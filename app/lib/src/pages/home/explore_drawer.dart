@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ExploreDrawer extends StatelessWidget {
   const ExploreDrawer({super.key});
@@ -92,17 +93,18 @@ class _DrawerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      onTap: () {
+      leading: Icon(icon, color: title == 'Logout' ? Colors.red : null),
+      title: Text(
+        title,
+        style: title == 'Logout' ? const TextStyle(color: Colors.red) : null,
+      ),
+      onTap: () async {
         Navigator.pop(context); // Close the drawer
         if (route != null) {
           if (route == '/logout') {
-            // Clear user session if needed
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text("Logged out")));
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (r) => false);
+            // Sign out from Firebase
+            await FirebaseAuth.instance.signOut();
+            // No need to navigate, Wrapper will handle auth state
           } else {
             Navigator.pushNamed(context, route!);
           }
