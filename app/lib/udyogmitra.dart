@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:udyogmitra/src/config/app_routes.dart';
 import 'package:udyogmitra/src/config/route_generator.dart';
 
@@ -7,11 +8,22 @@ class UdyogMitraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'UdyogMitra',
-      debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.home,
-      onGenerateRoute: generateRoute,
+    return ProviderScope(
+      child: MaterialApp(
+        title: 'UdyogMitra',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.green,
+          useMaterial3: true,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black87,
+            elevation: 0,
+          ),
+        ),
+        initialRoute: AppRoutes.home,
+        onGenerateRoute: generateRoute,
+      ),
     );
   }
 }
