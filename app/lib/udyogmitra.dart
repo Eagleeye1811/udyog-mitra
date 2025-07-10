@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:udyogmitra/src/config/app_routes.dart';
 import 'package:udyogmitra/src/config/route_generator.dart';
 import 'package:udyogmitra/src/pages/auth/wrapper.dart';
 
@@ -22,7 +21,7 @@ class UdyogMitraApp extends StatelessWidget {
             elevation: 0,
           ),
         ),
-        initialRoute: AppRoutes.home,
+        home: Wrapper(),
         onGenerateRoute: generateRoute,
       ),
     );
