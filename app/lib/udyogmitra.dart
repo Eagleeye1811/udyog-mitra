@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:udyogmitra/src/config/app_routes.dart';
 import 'package:udyogmitra/src/config/route_generator.dart';
+import 'package:udyogmitra/src/pages/auth/wrapper.dart';
 
 class UdyogMitraApp extends StatelessWidget {
   const UdyogMitraApp({super.key});
@@ -10,7 +10,7 @@ class UdyogMitraApp extends StatelessWidget {
     return MaterialApp(
       title: 'UdyogMitra',
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.home,
+      home: Wrapper(),
       onGenerateRoute: generateRoute,
     );
   }
