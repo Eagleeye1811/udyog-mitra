@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:udyogmitra/src/pages/auth/forgot-pass.dart'; // Import the ForgotPasswordPage
 
 class LoginPage extends StatefulWidget {
   final VoidCallback? onToggle;
@@ -56,6 +57,19 @@ class _LoginPageState extends State<LoginPage> {
               controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ForgotPasswordPage(),
+                    ),
+                  );
+                },
+                child: const Text('Forgot Password?'),
+              ),
             ),
             const SizedBox(height: 24),
             if (_error != null) ...[
