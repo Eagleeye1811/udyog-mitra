@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udyogmitra/src/pages/auth/login.dart';
-// Import your home screen here
+import 'package:udyogmitra/src/pages/auth/signup.dart';
 import 'package:udyogmitra/src/pages/home/home_screen.dart';
 
-class Wrapper extends StatelessWidget {
+class Wrapper extends StatefulWidget {
   const Wrapper({Key? key}) : super(key: key);
+
+  @override
+  State<Wrapper> createState() => _WrapperState();
+}
+
+class _WrapperState extends State<Wrapper> {
+  bool showSignUp = false;
+
+  void toggle() {
+    setState(() {
+      showSignUp = !showSignUp;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +35,9 @@ class Wrapper extends StatelessWidget {
           return const HomeScreen();
         } else {
           // User is NOT logged in
-          return const LoginPage();
+          return showSignUp
+              ? SignUpPage(onToggle: toggle)
+              : LoginPage(onToggle: toggle);
         }
       },
     );

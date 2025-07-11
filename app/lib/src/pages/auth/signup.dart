@@ -1,27 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class LoginPage extends StatefulWidget {
+class SignUpPage extends StatefulWidget {
   final VoidCallback? onToggle;
-  const LoginPage({Key? key, this.onToggle}) : super(key: key);
+  const SignUpPage({Key? key, this.onToggle}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isLoading = false;
   String? _error;
 
-  Future<void> _login() async {
+  Future<void> _signUp() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
+    if (_passwordController.text.trim() !=
+        _confirmPasswordController.text.trim()) {
+      setState(() {
+        _error = "Passwords do not match";
+        _isLoading = false;
+      });
+      return;
+    }
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
@@ -40,7 +50,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+        automaticallyImplyLeading: false, // Remove back arrow
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -57,6 +70,12 @@ class _LoginPageState extends State<LoginPage> {
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _confirmPasswordController,
+              decoration: const InputDecoration(labelText: 'Confirm Password'),
+              obscureText: true,
+            ),
             const SizedBox(height: 24),
             if (_error != null) ...[
               Text(_error!, style: const TextStyle(color: Colors.red)),
@@ -64,15 +83,18 @@ class _LoginPageState extends State<LoginPage> {
             ],
             _isLoading
                 ? const CircularProgressIndicator()
-                : ElevatedButton(onPressed: _login, child: const Text('Login')),
+                : ElevatedButton(
+                    onPressed: _signUp,
+                    child: const Text('Sign Up'),
+                  ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Not a user? "),
+                const Text("Already a user? "),
                 TextButton(
                   onPressed: widget.onToggle,
-                  child: const Text('Sign Up'),
+                  child: const Text('Login'),
                 ),
               ],
             ),
