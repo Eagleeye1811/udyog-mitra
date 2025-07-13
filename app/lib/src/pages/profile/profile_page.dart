@@ -149,7 +149,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       label: 'About Us',
                       selected: false,
                       onTap: () {
-                        // Navigate to About Us page
+                        Navigator.pushReplacementNamed(context, '/about-us');
                       },
                     ),
                     _NavBarItem(
