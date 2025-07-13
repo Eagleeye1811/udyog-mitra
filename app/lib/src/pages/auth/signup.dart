@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:udyogmitra/src/services/google_auth_service.dart';
+import 'package:udyogmitra/src/widgets/google_signin_button.dart';
 
 class SignUpPage extends StatefulWidget {
   final VoidCallback? onToggle;
@@ -15,6 +17,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   String? _error;
 
   Future<void> _signUp() async {
@@ -98,6 +101,35 @@ class _SignUpPageState extends State<SignUpPage> {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  Future<void> _signUpWithGoogle() async {
+    setState(() {
+      _isGoogleLoading = true;
+      _error = null;
+    });
+
+    try {
+      final userCredential = await GoogleAuthService.signUpWithGoogle();
+
+      if (userCredential == null) {
+        // User canceled the sign-in
+        setState(() {
+          _isGoogleLoading = false;
+        });
+        return;
+      }
+
+      // Navigation will be handled by the auth state in Wrapper
+    } catch (e) {
+      setState(() {
+        _error = GoogleAuthService.getErrorMessage(e);
+      });
+    } finally {
+      setState(() {
+        _isGoogleLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,11 +137,25 @@ class _SignUpPageState extends State<SignUpPage> {
         title: const Text('Sign Up'),
         automaticallyImplyLeading: false, // Remove back arrow
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 40),
+
+            // Google Sign-In Button
+            GoogleSignInButtonIcon(
+              onPressed: _signUpWithGoogle,
+              isLoading: _isGoogleLoading,
+              text: 'Sign up with Google',
+            ),
+
+            const SizedBox(height: 24),
+            const OrDivider(),
+            const SizedBox(height: 24),
+
+            // Email/Password Section
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(
@@ -176,7 +222,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
                     ),
-                    child: const Text('Sign Up'),
+                    child: const Text('Sign Up with Email'),
                   ),
             const SizedBox(height: 24),
             Row(
@@ -189,6 +235,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
