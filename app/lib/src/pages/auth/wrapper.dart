@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udyogmitra/src/pages/auth/login.dart';
 import 'package:udyogmitra/src/pages/auth/signup.dart';
+import 'package:udyogmitra/src/pages/auth/verify-email.dart';
 import 'package:udyogmitra/src/pages/home/home_screen.dart';
 
 class Wrapper extends StatefulWidget {
@@ -31,8 +32,10 @@ class _WrapperState extends State<Wrapper> {
           );
         }
         if (snapshot.hasData) {
-          // User is logged in
-          return const HomeScreen();
+          // User is logged in, check if email is verified
+          return snapshot.data!.emailVerified
+              ? const HomeScreen()
+              : const VerifyEmailPage();
         } else {
           // User is NOT logged in
           return showSignUp

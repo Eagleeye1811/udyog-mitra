@@ -17,10 +17,25 @@ class _LoginPageState extends State<LoginPage> {
   String? _error;
 
   Future<void> _login() async {
+    // Validate input fields
+    if (_emailController.text.trim().isEmpty) {
+      setState(() => _error = 'Please enter your email');
+      return;
+    }
+    if (_passwordController.text.trim().isEmpty) {
+      setState(() => _error = 'Please enter your password');
+      return;
+    }
+    if (!_isValidEmail(_emailController.text.trim())) {
+      setState(() => _error = 'Please enter a valid email address');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _error = null;
     });
+
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -29,13 +44,42 @@ class _LoginPageState extends State<LoginPage> {
       // Navigation will be handled by the auth state in Wrapper
     } on FirebaseAuthException catch (e) {
       setState(() {
-        _error = e.message;
+        switch (e.code) {
+          case 'user-not-found':
+            _error = 'No user found with this email address';
+            break;
+          case 'wrong-password':
+            _error = 'Incorrect password';
+            break;
+          case 'user-disabled':
+            _error = 'This account has been disabled';
+            break;
+          case 'too-many-requests':
+            _error = 'Too many failed attempts. Please try again later';
+            break;
+          case 'invalid-email':
+            _error = 'Invalid email address';
+            break;
+          case 'network-request-failed':
+            _error = 'Network error. Please check your connection';
+            break;
+          default:
+            _error = e.message ?? 'An error occurred during login';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'An unexpected error occurred. Please try again';
       });
     } finally {
       setState(() {
         _isLoading = false;
       });
     }
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   @override
@@ -49,13 +93,21 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.email),
+              ),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.lock),
+              ),
               obscureText: true,
             ),
             Align(
@@ -77,8 +129,20 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 16),
             ],
             _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(onPressed: _login, child: const Text('Login')),
+                ? const Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Signing you in...'),
+                    ],
+                  )
+                : ElevatedButton(
+                    onPressed: _login,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                    child: const Text('Login'),
+                  ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
