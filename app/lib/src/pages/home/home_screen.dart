@@ -139,7 +139,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       icon: Icons.info_outline,
                       label: 'About Us',
                       selected: _selectedIndex == 1,
-                      onTap: () => setState(() => _selectedIndex = 1),
+                      onTap: () {
+                        setState(() => _selectedIndex = 1);
+                        Navigator.pushReplacementNamed(context, '/about_us');
+                      },
                     ),
                     _NavBarItem(
                       icon: Icons.person_outline,
