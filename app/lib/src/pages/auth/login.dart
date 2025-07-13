@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:udyogmitra/src/pages/auth/forgot-pass.dart'; // Import the ForgotPasswordPage
+import 'package:udyogmitra/src/pages/auth/forgot-pass.dart';
+import 'package:udyogmitra/src/services/google_auth_service.dart';
+import 'package:udyogmitra/src/widgets/google_signin_button.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback? onToggle;
@@ -14,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   String? _error;
 
   Future<void> _login() async {
@@ -82,15 +85,57 @@ class _LoginPageState extends State<LoginPage> {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isGoogleLoading = true;
+      _error = null;
+    });
+
+    try {
+      final userCredential = await GoogleAuthService.signInWithGoogle();
+
+      if (userCredential == null) {
+        // User canceled the sign-in
+        setState(() {
+          _isGoogleLoading = false;
+        });
+        return;
+      }
+
+      // Navigation will be handled by the auth state in Wrapper
+    } catch (e) {
+      setState(() {
+        _error = GoogleAuthService.getErrorMessage(e);
+      });
+    } finally {
+      setState(() {
+        _isGoogleLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 40),
+
+            // Google Sign-In Button
+            GoogleSignInButtonIcon(
+              onPressed: _signInWithGoogle,
+              isLoading: _isGoogleLoading,
+            ),
+
+            const SizedBox(height: 24),
+            const OrDivider(),
+            const SizedBox(height: 24),
+
+            // Email/Password Section
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(
@@ -125,7 +170,26 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 24),
             if (_error != null) ...[
-              Text(_error!, style: const TextStyle(color: Colors.red)),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  border: Border.all(color: Colors.red.shade200),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error, color: Colors.red.shade700),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _error!,
+                        style: TextStyle(color: Colors.red.shade700),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
             ],
             _isLoading
@@ -141,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 50),
                     ),
-                    child: const Text('Login'),
+                    child: const Text('Login with Email'),
                   ),
             const SizedBox(height: 24),
             Row(
@@ -154,6 +218,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
