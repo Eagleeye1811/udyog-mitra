@@ -73,16 +73,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Feature cards
                 HomeFeatureCard(
                   icon: Icons.business_center,
-                  title: 'Map Your Skills',
-                  description: 'Connect skills to business opportunities',
+                  title: 'Business Planner',
+                  description: 'Complete skill-to-business planning journey',
                   onTap: () =>
-                      Navigator.pushNamed(context, '/skills_to_business'),
+                      Navigator.pushNamed(context, '/business-planner'),
                 ),
                 HomeFeatureCard(
                   icon: Icons.lightbulb_outline,
                   title: 'Evaluate Your Idea',
-                  description: 'Get insights for your business idea',
-                  onTap: () => Navigator.pushNamed(context, '/idea_evaluator'),
+                  description: 'Get detailed insights for your business idea',
+                  onTap: () => Navigator.pushNamed(context, '/idea-evaluator'),
                 ),
                 HomeFeatureCard(
                   icon: Icons.gavel,
