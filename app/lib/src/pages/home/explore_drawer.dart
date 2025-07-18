@@ -24,14 +24,14 @@ class ExploreDrawer extends StatelessWidget {
             child: ListView(
               children: const [
                 _DrawerItem(
-                  title: 'Skills to Business Mapping',
+                  title: 'Business Planner',
                   icon: Icons.business_center,
-                  route: '/skills_to_business',
+                  route: '/business-planner',
                 ),
                 _DrawerItem(
-                  title: 'Startup Idea Evaluator',
+                  title: 'Idea Evaluator',
                   icon: Icons.lightbulb_outline,
-                  route: '/idea_evaluator',
+                  route: '/idea-evaluator',
                 ),
                 _DrawerItem(
                   title: 'Govt. Scheme Eligibility',

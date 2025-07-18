@@ -6,4 +6,6 @@ class AppRoutes {
   static const String chatbot = '/chatbot';
   static const String profile = '/profile';
   static const String aboutUs = '/about-us';
+  static const String businessPlanner = '/business-planner';
+  static const String ideaEvaluator = '/idea-evaluator';
 }
