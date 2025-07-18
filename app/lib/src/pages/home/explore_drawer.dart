@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:udyogmitra/src/services/google_auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ExploreDrawer extends StatelessWidget {
   const ExploreDrawer({super.key});
@@ -102,9 +103,14 @@ class _DrawerItem extends StatelessWidget {
         Navigator.pop(context); // Close the drawer
         if (route != null) {
           if (route == '/logout') {
-            // Sign out from Google and Firebase using GoogleAuthService
+            // Sign out from Google (if used)
             await GoogleAuthService.signOut();
-            // No need to navigate, Wrapper will handle auth state
+            await Future.delayed(const Duration(milliseconds: 200));
+            await FirebaseAuth.instance.signOut();
+            // Navigate to login page and clear navigation stack
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/', (route) => false);
           } else {
             Navigator.pushNamed(context, route!);
           }

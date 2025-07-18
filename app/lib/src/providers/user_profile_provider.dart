@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // dart:convert helps us convert our data to text format for saving
 import 'dart:convert';
+// Firebase Auth to get current user info
+import 'package:firebase_auth/firebase_auth.dart';
 // This imports our UserProfile model (the structure of user data)
 import '../models/user_profile.dart';
 
@@ -54,29 +56,53 @@ class UserProfileNotifier extends StateNotifier<UserProfile?> {
   /// Load user profile from local storage (phone's memory)
   ///
   /// HOW DATA LOADING WORKS: 📱
-  /// 1. Check if we have saved user data on the phone
+  /// 1. Check if we have saved user data for the current user
   /// 2. If yes, load it and convert from text back to UserProfile object
-  /// 3. If no, create some sample data for demonstration
+  /// 3. If no, create empty profile for the current user
   /// 4. Set 'state' which automatically notifies all listening widgets
   Future<void> _loadUserProfile() async {
     try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        print('🔴 No current user found');
+        return;
+      }
+
       // Get access to phone's storage
       final prefs = await SharedPreferences.getInstance();
-      // Try to find saved user profile data (stored as text)
-      final profileJson = prefs.getString('user_profile');
+      // Create a unique key for each user based on their UID
+      final userKey = 'user_profile_${currentUser.uid}';
+      final profileJson = prefs.getString(userKey);
+
+      print('🔍 Loading profile for user: ${currentUser.uid}');
+      print('🔍 User email: ${currentUser.email}');
+      print('🔍 Profile key: $userKey');
+      print('🔍 Profile data exists: ${profileJson != null}');
 
       if (profileJson != null) {
-        // We found saved data! Convert it back to UserProfile object
+        // We found saved data for this user! Convert it back to UserProfile object
         final profileData = json.decode(profileJson);
         state = UserProfile.fromJson(profileData);
+        print(
+          '✅ Loaded existing profile for user: ${state?.fullName} (${currentUser.email})',
+        );
+        bool isComplete =
+            state?.fullName.isNotEmpty == true &&
+            state?.phoneNumber.isNotEmpty == true &&
+            state?.gender.isNotEmpty == true &&
+            state?.location.isNotEmpty == true;
+        print('✅ Profile is complete: $isComplete');
       } else {
-        // No saved data found, create sample data for first-time users
-        state = _createMockProfile();
-        await _saveUserProfile();
+        // No saved data found for this user, create empty profile
+        state = _createEmptyProfile();
+        print('🆕 Created empty profile for new user: ${currentUser.email}');
+        print('🆕 Profile is complete: false');
+        // Don't auto-save here, let the user complete the form first
       }
     } catch (e) {
-      // If anything goes wrong, create sample data so app doesn't crash
-      state = _createMockProfile();
+      // If anything goes wrong, create empty profile so app doesn't crash
+      print('❌ Error loading profile: $e');
+      state = _createEmptyProfile();
     }
   }
 
@@ -85,19 +111,28 @@ class UserProfileNotifier extends StateNotifier<UserProfile?> {
   /// HOW DATA SAVING WORKS: 💾
   /// 1. Take our UserProfile object (contains all user data)
   /// 2. Convert it to text format (JSON) so it can be stored
-  /// 3. Save this text to phone's permanent storage
-  /// 4. Next time app opens, we can load this saved data
+  /// 3. Save this text to phone's permanent storage with user-specific key
+  /// 4. Next time app opens, we can load this saved data for the specific user
   Future<void> _saveUserProfile() async {
     if (state != null) {
       try {
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser == null) {
+          print('No current user found, cannot save profile');
+          return;
+        }
+
         // Get access to phone's storage
         final prefs = await SharedPreferences.getInstance();
+        // Create a unique key for each user based on their UID
+        final userKey = 'user_profile_${currentUser.uid}';
         // Convert UserProfile object to text format
         final profileJson = json.encode(state!.toJson());
-        // Save the text to phone storage with key 'user_profile'
-        await prefs.setString('user_profile', profileJson);
+        // Save the text to phone storage with user-specific key
+        await prefs.setString(userKey, profileJson);
+        print('Profile saved for user: ${currentUser.email}');
       } catch (e) {
-        // If saving fails, print error message (in real app, we might show user a message)
+        // If saving fails, print error message
         print('Error saving profile: $e');
       }
     }
@@ -242,60 +277,87 @@ class UserProfileNotifier extends StateNotifier<UserProfile?> {
     }
   }
 
-  // Create mock profile data
-  UserProfile _createMockProfile() {
+  // Create empty profile for new users
+  UserProfile _createEmptyProfile() {
+    final user = FirebaseAuth.instance.currentUser;
     return UserProfile(
-      id: 'user_001',
-      fullName: 'John Smith',
-      email: 'john.smith@example.com',
-      phoneNumber: '9876543210',
-      gender: 'Male',
-      language: 'English',
-      location: 'Madurai Village, Tamil Nadu',
-      skills: ['Organic Farming', 'Dairy Farming', 'Cooking'],
-      businesses: [
-        Business(
-          id: 'business_001',
-          name: 'Dairy Farming',
-          description: 'Small-scale dairy farm with 4 cows',
-          status: BusinessStatus.active,
-          createdAt: DateTime.now().subtract(const Duration(days: 30)),
-        ),
-        Business(
-          id: 'business_002',
-          name: 'Organic Vegetable Farm',
-          description: 'Growing organic vegetables for local market',
-          status: BusinessStatus.underReview,
-          createdAt: DateTime.now().subtract(const Duration(days: 15)),
-        ),
-      ],
-      applications: [
-        Application(
-          id: 'app_001',
-          title: 'Dairy Farming Scheme',
-          type: ApplicationType.scheme,
-          status: ApplicationStatus.pending,
-          dateApplied: DateTime.now().subtract(const Duration(days: 10)),
-        ),
-        Application(
-          id: 'app_002',
-          title: 'Farmer Loan',
-          type: ApplicationType.loan,
-          status: ApplicationStatus.approved,
-          dateApplied: DateTime.now().subtract(const Duration(days: 25)),
-        ),
-        Application(
-          id: 'app_003',
-          title: 'Agricultural Grant',
-          type: ApplicationType.grant,
-          status: ApplicationStatus.underReview,
-          dateApplied: DateTime.now().subtract(const Duration(days: 5)),
-        ),
-      ],
-      education: 'Higher Secondary Education',
-      previousOccupation: 'Agricultural Worker',
-      isGovernmentIdVerified: true,
+      id: user?.uid ?? 'unknown_user',
+      fullName: '', // Empty - will be filled in the form
+      email: user?.email ?? '',
+      phoneNumber: '', // Empty - will be filled in the form
+      gender: '', // Empty - will be filled in the form
+      language: 'English', // Default language
+      location: '', // Empty - will be filled in the form
+      skills: [], // Empty list
+      businesses: [], // Empty list
+      applications: [], // Empty list
+      education: null, // Optional
+      previousOccupation: null, // Optional
+      isGovernmentIdVerified: false, // Default to false
     );
+  }
+
+  /// Initialize profile for new users
+  /// This creates a fresh profile for a new user but doesn't save it yet
+  Future<void> initializeNewUserProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      print('Initializing new user profile for: ${user.email}');
+
+      // Clear any existing data for this user to ensure a fresh start
+      final prefs = await SharedPreferences.getInstance();
+      final userKey = 'user_profile_${user.uid}';
+      await prefs.remove(userKey);
+
+      state = UserProfile(
+        id: user.uid,
+        fullName: user.displayName ?? '',
+        email: user.email ?? '',
+        phoneNumber: '',
+        gender: '',
+        language: 'English',
+        location: '',
+        skills: [],
+        businesses: [],
+        applications: [],
+        education: null,
+        previousOccupation: null,
+        isGovernmentIdVerified: false,
+      );
+      print('New user profile initialized: ${state?.email}');
+    }
+  }
+
+  /// Clear profile (useful for testing)
+  Future<void> clearProfile() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final userKey = 'user_profile_${currentUser.uid}';
+      await prefs.remove(userKey);
+      state = _createEmptyProfile();
+      print('Profile cleared for user: ${currentUser.email}');
+    } else {
+      print('No current user found, cannot clear profile');
+    }
+  }
+
+  /// Reload profile for current user (useful when user changes)
+  Future<void> reloadProfile() async {
+    await _loadUserProfile();
+  }
+
+  /// This method ensures complete reset of user data when logging out or signing up
+  /// Call this method when a user logs out to ensure clean state for next user
+  Future<void> resetStateForNewUser() async {
+    // Set state to null first to ensure clean slate
+    state = null;
+
+    // Wait a moment for state to clear
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    // Then try to reload with current user (if any)
+    await _loadUserProfile();
   }
 }
 
@@ -357,4 +419,9 @@ final languagesProvider = Provider<List<String>>((ref) {
 // Gender options provider
 final genderOptionsProvider = Provider<List<String>>((ref) {
   return ['Male', 'Female', 'Other'];
+});
+
+// Auth state provider to track authentication changes
+final authStateProvider = StreamProvider<User?>((ref) {
+  return FirebaseAuth.instance.authStateChanges();
 });
