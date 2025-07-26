@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:udyogmitra/src/services/google_auth_service.dart';
-import 'package:udyogmitra/src/widgets/google_signin_button.dart';
+import 'package:udyogmitra/src/providers/user_profile_provider.dart';
 
-class SignUpPage extends StatefulWidget {
+class SignUpPage extends ConsumerStatefulWidget {
   final VoidCallback? onToggle;
   const SignUpPage({Key? key, this.onToggle}) : super(key: key);
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  ConsumerState<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
+class _SignUpPageState extends ConsumerState<SignUpPage>
+    with TickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -98,6 +100,12 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
       // Send email verification
       await result.user!.sendEmailVerification();
 
+      // Reset profile state for the new user to ensure clean data
+      ref.read(userProfileProvider.notifier).resetStateForNewUser();
+
+      // After resetting, initialize a new profile for this user
+      await ref.read(userProfileProvider.notifier).initializeNewUserProfile();
+
       // Navigation will be handled by the auth state in Wrapper
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -151,6 +159,12 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
         });
         return;
       }
+
+      // Reset profile state for the new Google user
+      ref.read(userProfileProvider.notifier).resetStateForNewUser();
+
+      // After resetting, initialize a new profile with Google user info
+      await ref.read(userProfileProvider.notifier).initializeNewUserProfile();
     } catch (e) {
       setState(() {
         _error = GoogleAuthService.getErrorMessage(e);
@@ -568,7 +582,7 @@ class _SignUpPageState extends State<SignUpPage> with TickerProviderStateMixin {
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w600, 
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),

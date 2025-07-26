@@ -3,6 +3,7 @@ import 'package:udyogmitra/src/pages/home/welcome_banner.dart';
 import 'package:udyogmitra/src/pages/home/home_carousel.dart';
 import 'package:udyogmitra/src/pages/home/explore_drawer.dart';
 import 'package:udyogmitra/src/pages/home/home_feature_card.dart';
+// import 'package:udyogmitra/src/pages/debug/profile_test_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +24,20 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontWeight: FontWeight.w800, color: Colors.green),
         ),
         centerTitle: true,
+        actions: [
+          // Debug button (remove in production)
+          // IconButton(
+          //   icon: const Icon(Icons.bug_report),
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => const ProfileTestPage(),
+          //       ),
+          //     );
+          //   },
+          // ),
+        ],
       ),
       drawer: const ExploreDrawer(),
       body: Stack(

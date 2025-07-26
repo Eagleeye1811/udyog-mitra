@@ -3,16 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udyogmitra/src/pages/auth/forgot-pass.dart';
 import 'package:udyogmitra/src/services/google_auth_service.dart';
 import 'package:udyogmitra/src/widgets/google_signin_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:udyogmitra/src/providers/user_profile_provider.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   final VoidCallback? onToggle;
   const LoginPage({Key? key, this.onToggle}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
+class _LoginPageState extends ConsumerState<LoginPage>
+    with TickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -78,6 +81,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
+      // Reset the user profile state for the new login
+      ref.read(userProfileProvider.notifier).resetStateForNewUser();
     } on FirebaseAuthException catch (e) {
       setState(() {
         switch (e.code) {
@@ -133,6 +139,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         });
         return;
       }
+
+      // Reset the user profile state for the new Google login
+      ref.read(userProfileProvider.notifier).resetStateForNewUser();
     } catch (e) {
       setState(() {
         _error = GoogleAuthService.getErrorMessage(e);
@@ -530,7 +539,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-
                                 ),
                               ),
                             ),

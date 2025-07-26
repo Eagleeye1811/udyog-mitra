@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:udyogmitra/src/pages/home/home_screen.dart';
 import 'dart:async';
+import 'package:udyogmitra/src/pages/auth/user_profile_form.dart';
 
 class VerifyEmailPage extends StatefulWidget {
   const VerifyEmailPage({Key? key}) : super(key: key);
@@ -46,7 +47,18 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
       });
 
-      if (isEmailVerified) timer?.cancel();
+      if (isEmailVerified) {
+        timer?.cancel();
+
+        // Navigate to profile form when email is verified
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const UserProfileFormPage(),
+            ),
+          );
+        }
+      }
     } catch (e) {
       // Handle error silently or log it
       print('Error checking email verification: $e');
@@ -103,7 +115,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
   @override
   Widget build(BuildContext context) => isEmailVerified
-      ? const HomeScreen()
+      ? const UserProfileFormPage()
       : Scaffold(
           appBar: AppBar(
             title: const Text('Verify Email'),
