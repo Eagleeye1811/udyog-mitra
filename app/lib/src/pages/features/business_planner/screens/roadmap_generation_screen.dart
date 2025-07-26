@@ -44,7 +44,7 @@ class _RoadmapGenerationScreenState extends State<RoadmapGenerationScreen> {
   Map<String, dynamic> _getGeneratedRoadmap() {
     // This would normally come from your backend API
     return {
-      'business_name': widget.selectedIdea['title'],
+      'business_name': widget.selectedIdea['title'] ?? 'Your Business',
       'total_duration': '12-18 months',
       'phases': [
         {
@@ -324,21 +324,61 @@ class _RoadmapGenerationScreenState extends State<RoadmapGenerationScreen> {
           const SizedBox(height: 24),
 
           if (_isLoading) ...[
-            const Expanded(
+            Expanded(
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: Color(0xFF2E7D32)),
-                    SizedBox(height: 16),
-                    Text(
-                      'Creating your personalized roadmap...',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2E7D32).withOpacity(0.2),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF2E7D32),
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          Icon(
+                            Icons.auto_awesome,
+                            color: const Color(0xFF2E7D32),
+                            size: 28,
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 24),
                     Text(
-                      'Almost done!',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      'AI is crafting your roadmap...',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Creating a personalized business roadmap with AI insights',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),

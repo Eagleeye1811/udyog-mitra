@@ -170,16 +170,61 @@ class _BusinessIdeasScreenState extends State<BusinessIdeasScreen> {
           const SizedBox(height: 24),
 
           if (_isLoading) ...[
-            const Expanded(
+            Expanded(
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: Color(0xFF2E7D32)),
-                    SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2E7D32).withOpacity(0.2),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF2E7D32),
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          Icon(
+                            Icons.auto_awesome,
+                            color: const Color(0xFF2E7D32),
+                            size: 28,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     Text(
-                      'Generating personalized business ideas...',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                      'UdyogMitra AI is analyzing your skills...',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Generating personalized business opportunities',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import '../../../../services/api_service.dart';
+import '../../../../services/api_models.dart';
 
 class IdeaEvaluationScreen extends StatefulWidget {
   final Map<String, dynamic> selectedIdea;
@@ -21,6 +24,8 @@ class IdeaEvaluationScreen extends StatefulWidget {
 class _IdeaEvaluationScreenState extends State<IdeaEvaluationScreen> {
   Map<String, dynamic>? _evaluationResult;
   bool _isLoading = true;
+  String? _errorMessage;
+  CancelToken? _cancelToken;
 
   @override
   void initState() {
@@ -28,73 +33,305 @@ class _IdeaEvaluationScreenState extends State<IdeaEvaluationScreen> {
     _generateEvaluation();
   }
 
-  void _generateEvaluation() {
-    // Simulate API call to evaluate the business idea
-    Future.delayed(const Duration(seconds: 3), () {
-      setState(() {
-        _evaluationResult = _getDetailedEvaluation();
-        _isLoading = false;
-      });
-    });
+  @override
+  void dispose() {
+    _cancelToken?.cancel('Widget disposed');
+    super.dispose();
   }
 
-  Map<String, dynamic> _getDetailedEvaluation() {
-    // This would normally come from your backend API
+  void _generateEvaluation() async {
+    // Check if we already have API evaluation data (from standalone flow)
+    if (widget.selectedIdea.containsKey('api_evaluation')) {
+      setState(() {
+        _evaluationResult = _convertApiEvaluationToUIFormat(
+          widget.selectedIdea['api_evaluation'],
+        );
+        _isLoading = false;
+      });
+    } else {
+      // For business planner flow, make actual API call
+      try {
+        setState(() {
+          _isLoading = true;
+          _errorMessage = null;
+        });
+
+        // Cancel any previous request
+        _cancelToken?.cancel();
+        _cancelToken = CancelToken();
+
+        // Prepare the idea description for API
+        final ideaDescription =
+            '''
+Business Idea: ${widget.selectedIdea['title']}
+
+Description: ${widget.selectedIdea['description']}
+
+Skills Available: ${widget.userSkills.join(', ')}
+        ''';
+
+        // Make API call
+        final evaluationResponse = await ApiService.validateIdea(
+          idea: ideaDescription,
+          location: 'India', // Can be made configurable
+          cancelToken: _cancelToken,
+        );
+
+        if (_cancelToken?.isCancelled == false) {
+          setState(() {
+            _evaluationResult = _convertApiEvaluationToUIFormat(
+              evaluationResponse['response'],
+            );
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        if (_cancelToken?.isCancelled == false) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'Failed to evaluate idea: ${e.toString()}';
+          });
+        }
+      }
+    }
+  }
+
+  Map<String, dynamic> _convertApiEvaluationToUIFormat(dynamic apiEvaluation) {
+    // Convert the API evaluation response to the format expected by the UI
+    // Handle both IdeaEvaluationResponse object and raw API response
+
+    String summary = '';
+    String marketDemand = '';
+    String? suggestions;
+    String? challenges;
+    String? govSchemes;
+    String? competitors;
+    String? investmentPotential;
+    String? growthOpportunities;
+    String score = '7.5';
+
+    if (apiEvaluation is IdeaEvaluationResponse) {
+      summary = apiEvaluation.summary;
+      marketDemand = apiEvaluation.marketDemand;
+      suggestions = apiEvaluation.suggestions;
+      challenges = apiEvaluation.challenges;
+      govSchemes = apiEvaluation.govSchemes;
+      competitors = apiEvaluation.competitors;
+      investmentPotential = apiEvaluation.investmentPotential;
+      growthOpportunities = apiEvaluation.growthOpportunities;
+      score = apiEvaluation.score;
+    } else if (apiEvaluation is Map<String, dynamic>) {
+      summary = apiEvaluation['summary'] ?? '';
+      marketDemand = apiEvaluation['market_demand'] ?? '';
+      suggestions = apiEvaluation['suggestions'];
+      challenges = apiEvaluation['challenges'];
+      govSchemes = apiEvaluation['gov_schemes'];
+      competitors = apiEvaluation['competitors'];
+      investmentPotential = apiEvaluation['investment_potential'];
+      growthOpportunities = apiEvaluation['growth_opportunities'];
+      score = apiEvaluation['score'] ?? '7.5';
+    }
+
+    // Parse the score and create sub-scores
+    double mainScore = double.tryParse(score) ?? 7.5;
+
+    // Generate realistic sub-scores based on main score with some variation
+    double feasibilityScore = (mainScore + (mainScore * 0.1 - 0.5)).clamp(
+      0.0,
+      10.0,
+    );
+    double marketScore = (mainScore - (mainScore * 0.1 - 0.3)).clamp(0.0, 10.0);
+    double financialScore = (mainScore + (mainScore * 0.05 - 0.2)).clamp(
+      0.0,
+      10.0,
+    );
+    double riskScore = (mainScore - (mainScore * 0.15)).clamp(0.0, 10.0);
+
+    // Extract structured data from text responses
+    List<String> strengthsList = _extractListFromText(
+      suggestions ?? summary,
+      'strength',
+    );
+    List<String> challengesList = _extractListFromText(
+      challenges ?? '',
+      'challenge',
+    );
+    List<String> governmentSchemes = _extractListFromText(
+      govSchemes ?? '',
+      'scheme',
+    );
+
     return {
-      'overall_score': 8.4,
-      'feasibility_score': 8.8,
-      'market_potential_score': 8.0,
-      'financial_viability_score': 8.2,
-      'risk_assessment_score': 7.5,
-      'strengths': [
-        'High demand in digital market',
-        'Leverages your existing skills',
-        'Low initial investment required',
-        'Scalable business model',
-        'Multiple revenue streams possible',
-      ],
-      'challenges': [
-        'High competition in digital space',
-        'Need to build client base',
-        'Requires continuous skill updating',
-        'Client acquisition can be challenging initially',
-      ],
-      'required_skills': [
-        'Project Management',
-        'Client Communication',
-        'Business Development',
-        'Financial Planning',
-      ],
-      'skill_gaps': ['Business Development', 'Financial Planning'],
+      'overall_score': mainScore,
+      'feasibility_score': feasibilityScore,
+      'market_potential_score': marketScore,
+      'financial_viability_score': financialScore,
+      'risk_assessment_score': riskScore,
+      'api_summary': summary,
+      'api_market_demand': marketDemand,
+      'api_suggestions': suggestions,
+      'api_challenges': challenges,
+      'api_competitors': competitors,
+      'api_investment_potential': investmentPotential,
+      'api_growth_opportunities': growthOpportunities,
+      'api_gov_schemes': govSchemes,
+      'strengths': strengthsList.isNotEmpty
+          ? strengthsList
+          : [
+              'AI-powered evaluation completed',
+              'Leverages your skills: ${widget.userSkills.join(', ')}',
+              'Market analysis provided',
+              'Investment potential assessed',
+            ],
+      'challenges': challengesList.isNotEmpty
+          ? challengesList
+          : [
+              'Market competition to consider',
+              'Initial setup requirements',
+              'Skill development may be needed',
+            ],
+      'required_skills': widget.userSkills.isNotEmpty
+          ? widget.userSkills
+          : [
+              'Project Management',
+              'Client Communication',
+              'Business Development',
+            ],
+      'skill_gaps': _identifySkillGaps(suggestions ?? summary),
       'financial_projections': {
-        'initial_investment': '₹1,50,000',
-        'monthly_expenses': '₹25,000',
-        'break_even_time': '6-8 months',
-        'year_1_revenue': '₹8,00,000 - ₹12,00,000',
-        'year_2_revenue': '₹15,00,000 - ₹25,00,000',
-        'profit_margin': '25-35%',
+        'initial_investment':
+            _extractFinancialInfo(investmentPotential, 'investment') ??
+            widget.selectedIdea['investment_range'] ??
+            '₹2,00,000 - ₹5,00,000',
+        'monthly_expenses':
+            _extractFinancialInfo(summary, 'expenses') ?? '₹25,000 - ₹50,000',
+        'break_even_time': _extractTimeInfo(summary) ?? '6-12 months',
+        'year_1_revenue':
+            _extractFinancialInfo(summary, 'revenue') ??
+            '₹6,00,000 - ₹12,00,000',
+        'year_2_revenue':
+            _extractFinancialInfo(growthOpportunities, 'growth') ??
+            '₹12,00,000 - ₹25,00,000',
+        'profit_margin': '20-35%',
       },
       'market_analysis': {
-        'target_market_size': 'Large (SMBs and Startups)',
-        'competition_level': 'High',
-        'growth_potential': 'Very High',
-        'market_trends': 'Digital transformation increasing demand',
+        'target_market_size':
+            _extractMarketInfo(marketDemand, 'size') ??
+            'Growing market segment',
+        'competition_level':
+            _extractMarketInfo(competitors, 'competition') ??
+            'Moderate to High',
+        'growth_potential':
+            _extractMarketInfo(growthOpportunities, 'growth') ??
+            'High potential',
+        'market_trends':
+            _extractMarketInfo(marketDemand, 'trends') ??
+            'Positive market trends',
       },
-      'next_steps': [
-        'Create a detailed business plan',
-        'Build a portfolio website',
-        'Network with potential clients',
-        'Set up legal structure (LLP/Pvt Ltd)',
-        'Develop service packages and pricing',
-        'Create marketing strategy',
-      ],
-      'government_schemes': [
-        'Startup India Scheme',
-        'MUDRA Loan',
-        'Digital India Initiative',
-        'Skill India Program',
-      ],
+      'next_steps': _extractActionItems(suggestions ?? summary),
+      'government_schemes': governmentSchemes.isNotEmpty
+          ? governmentSchemes
+          : [
+              'Startup India Scheme',
+              'MUDRA Loan',
+              'Digital India Initiative',
+              'Stand-up India',
+            ],
+      'api_evaluation_data': apiEvaluation, // Store original API data
     };
+  }
+
+  // Helper methods to extract structured information from API text responses
+  List<String> _extractListFromText(String text, String type) {
+    if (text.isEmpty) return [];
+
+    // Look for bullet points, numbered lists, or sentences that indicate the type
+    List<String> items = [];
+
+    // Split by common delimiters and filter relevant items
+    List<String> sentences = text
+        .split(RegExp(r'[.!?•\n-]'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty && s.length > 10)
+        .toList();
+
+    for (String sentence in sentences.take(5)) {
+      // Limit to 5 items
+      if (sentence.length > 15 && sentence.length < 150) {
+        items.add(sentence);
+      }
+    }
+
+    return items;
+  }
+
+  List<String> _identifySkillGaps(String text) {
+    List<String> commonSkills = [
+      'Business Development',
+      'Marketing',
+      'Financial Planning',
+      'Project Management',
+      'Digital Marketing',
+      'Sales',
+    ];
+
+    List<String> gaps = [];
+    for (String skill in commonSkills) {
+      if (!widget.userSkills.contains(skill) &&
+          text.toLowerCase().contains(skill.toLowerCase())) {
+        gaps.add(skill);
+      }
+    }
+
+    return gaps.take(3).toList(); // Limit to 3 skill gaps
+  }
+
+  String? _extractFinancialInfo(String? text, String type) {
+    if (text == null || text.isEmpty) return null;
+
+    // Look for currency amounts in the text
+    RegExp rupeePattern = RegExp(r'₹[\d,]+(?:\s*-\s*₹[\d,]+)?');
+    Match? match = rupeePattern.firstMatch(text);
+
+    return match?.group(0);
+  }
+
+  String? _extractTimeInfo(String text) {
+    // Look for time periods in the text
+    RegExp timePattern = RegExp(r'\d+[-\s]*(?:months?|years?)');
+    Match? match = timePattern.firstMatch(text);
+
+    return match?.group(0);
+  }
+
+  String? _extractMarketInfo(String? text, String type) {
+    if (text == null || text.isEmpty) return null;
+
+    // Extract the first meaningful sentence
+    List<String> sentences = text
+        .split('.')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty && s.length > 20)
+        .toList();
+
+    return sentences.isNotEmpty ? sentences.first : null;
+  }
+
+  List<String> _extractActionItems(String text) {
+    List<String> defaultActions = [
+      'Conduct detailed market research',
+      'Develop a comprehensive business plan',
+      'Secure initial funding or investment',
+      'Build a strong team with required skills',
+      'Create a minimum viable product (MVP)',
+      'Establish key partnerships',
+      'Develop marketing and sales strategy',
+    ];
+
+    // Try to extract action items from the text, otherwise use defaults
+    List<String> actions = _extractListFromText(text, 'action');
+
+    return actions.isNotEmpty ? actions : defaultActions.take(5).toList();
   }
 
   @override
@@ -130,27 +367,97 @@ class _IdeaEvaluationScreenState extends State<IdeaEvaluationScreen> {
           const SizedBox(height: 24),
 
           if (_isLoading) ...[
-            const Expanded(
+            Expanded(
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: Color(0xFF2E7D32)),
-                    SizedBox(height: 16),
-                    Text(
-                      'Analyzing your business idea...',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2E7D32).withOpacity(0.2),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF2E7D32),
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          Icon(
+                            Icons.psychology,
+                            color: const Color(0xFF2E7D32),
+                            size: 28,
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 24),
                     Text(
-                      'This may take a few moments',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      'AI is evaluating your idea...',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Analyzing feasibility, market potential, and providing insights',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
             ),
-          ] else ...[
+          ] else if (_errorMessage != null) ...[
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(fontSize: 16, color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _generateEvaluation,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E7D32),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ] else if (_evaluationResult != null) ...[
             Expanded(
               child: ListView(
                 children: [

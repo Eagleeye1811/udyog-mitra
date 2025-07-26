@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../business_planner/screens/idea_evaluation_screen.dart';
 import '../business_planner/screens/roadmap_generation_screen.dart';
+import '../../../services/api_service.dart';
 
 class IdeaEvaluatorScreen extends StatefulWidget {
   const IdeaEvaluatorScreen({super.key});
@@ -196,6 +197,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
 
   String _selectedCategory = 'Technology';
   String _selectedInvestment = 'Low (₹50,000 - ₹2,00,000)';
+  bool _isLoading = false;
 
   final List<String> _categories = [
     'Technology',
@@ -224,20 +226,64 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
         _targetMarketController.text.isNotEmpty;
   }
 
-  void _submitIdea() {
-    if (_isFormValid) {
-      final ideaData = {
-        'title': _titleController.text,
-        'description': _descriptionController.text,
-        'category': _selectedCategory,
-        'target_market': _targetMarketController.text,
-        'revenue_model': _revenueModelController.text.isNotEmpty
-            ? _revenueModelController.text
-            : 'To be determined',
-        'investment_range': _selectedInvestment,
-        'match_percentage': 85, // Default for standalone ideas
-      };
-      widget.onIdeaSubmitted(ideaData);
+  void _submitIdea() async {
+    if (_isFormValid && !_isLoading) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        // Create the full idea description for API evaluation
+        final fullIdeaDescription =
+            '''
+Business Idea: ${_titleController.text}
+
+Description: ${_descriptionController.text}
+
+Category: $_selectedCategory
+Target Market: ${_targetMarketController.text}
+Expected Investment: $_selectedInvestment
+${_revenueModelController.text.isNotEmpty ? 'Revenue Model: ${_revenueModelController.text}' : ''}
+        ''';
+
+        // Call the API to evaluate the idea
+        final evaluationResponse = await IdeaEvaluatorApiService.validateIdea(
+          idea: fullIdeaDescription,
+          location: 'India', // Default location, can be made configurable
+        );
+
+        // Create idea data structure that matches what the UI expects
+        final ideaData = {
+          'title': _titleController.text,
+          'description': _descriptionController.text,
+          'category': _selectedCategory,
+          'target_market': _targetMarketController.text,
+          'revenue_model': _revenueModelController.text.isNotEmpty
+              ? _revenueModelController.text
+              : 'To be determined',
+          'investment_range': _selectedInvestment,
+          'api_evaluation': evaluationResponse,
+        };
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        widget.onIdeaSubmitted(ideaData);
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to evaluate idea: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -377,7 +423,7 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: _isFormValid ? _submitIdea : null,
+                onPressed: _isFormValid && !_isLoading ? _submitIdea : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2E7D32),
                   foregroundColor: Colors.white,
@@ -386,7 +432,16 @@ class _IdeaInputScreenState extends State<IdeaInputScreen> {
                     vertical: 12,
                   ),
                 ),
-                child: const Text('Evaluate Idea'),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Evaluate Idea'),
               ),
             ],
           ),
