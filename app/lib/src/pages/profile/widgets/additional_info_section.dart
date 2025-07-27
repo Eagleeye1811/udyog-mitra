@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 import '../../../providers/user_profile_provider.dart';
 
 class AdditionalInfoSection extends ConsumerStatefulWidget {
@@ -34,17 +36,13 @@ class _AdditionalInfoSectionState extends ConsumerState<AdditionalInfoSection> {
                 horizontal: 20,
                 vertical: 8,
               ),
-              title: const Text(
+              title: Text(
                 'Additional Information',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: context.textStyles.titleMedium,
               ),
               subtitle: Text(
                 'Education, previous work, verification',
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                style: context.textStyles.bodySmall.grey(context),
               ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -198,13 +196,7 @@ class _AdditionalInfoSectionState extends ConsumerState<AdditionalInfoSection> {
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: hasData ? Colors.grey[50] : Colors.orange[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: hasData ? Colors.grey[200]! : Colors.orange[200]!,
-        ),
-      ),
+      decoration: context.cardStyles.secondaryCard,
       child: Row(
         children: [
           Icon(
@@ -217,23 +209,9 @@ class _AdditionalInfoSectionState extends ConsumerState<AdditionalInfoSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600],
-                  ),
-                ),
+                Text(label, style: context.textStyles.titleSmall),
                 const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: hasData ? Colors.black87 : Colors.orange[700],
-                  ),
-                ),
+                Text(value, style: context.textStyles.bodyMedium),
               ],
             ),
           ),

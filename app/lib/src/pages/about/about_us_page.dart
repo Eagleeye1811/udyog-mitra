@@ -1,30 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:udyogmitra/src/config/themes/app_theme_provider.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
+import 'package:udyogmitra/src/widgets/navbar.dart';
 
 /// About Us Page - Shows information about UdyogMitra
 ///
 /// This page provides information about the company, mission, vision,
 /// team members, and core values following the same UI/UX theme
 /// as the rest of the application.
-class AboutUsPage extends StatelessWidget {
+class AboutUsPage extends ConsumerWidget {
   const AboutUsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text(
-          'About Us',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
-        ),
+        title: Text('About Us', style: context.textStyles.appBarTitle),
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 10),
+            child: IconButton(
+              icon: Icon(
+                ref.watch(themeModeProvider) == ThemeMode.dark
+                    ? Icons.dark_mode
+                    : Icons.light_mode,
+                color: context.textStyles.bodyMedium.color,
+              ),
+              onPressed: () {
+                ref.read(themeModeProvider.notifier).toggleTheme();
+              },
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -36,47 +51,47 @@ class AboutUsPage extends StatelessWidget {
             child: Column(
               children: [
                 // Hero Section - Company intro
-                _buildHeroSection(),
+                _buildHeroSection(context),
 
                 const SizedBox(height: 16),
 
                 // Mission & Vision Section
-                _buildMissionVisionSection(),
+                _buildMissionVisionSection(context),
 
                 const SizedBox(height: 16),
 
                 // Our Story Section
-                _buildOurStorySection(),
+                _buildOurStorySection(context),
 
                 const SizedBox(height: 16),
 
                 // Core Values Section
-                _buildCoreValuesSection(),
+                _buildCoreValuesSection(context),
 
                 const SizedBox(height: 16),
 
                 // Key Features Section
-                _buildKeyFeaturesSection(),
+                _buildKeyFeaturesSection(context),
 
                 const SizedBox(height: 16),
 
                 // Team Section
-                _buildTeamSection(),
+                _buildTeamSection(context),
 
                 const SizedBox(height: 16),
 
                 // User Testimonials Section
-                _buildTestimonialsSection(),
+                _buildTestimonialsSection(context),
 
                 const SizedBox(height: 16),
 
                 // Our Impact Section
-                _buildImpactSection(),
+                _buildImpactSection(context),
 
                 const SizedBox(height: 16),
 
                 // Data Privacy Section
-                _buildDataPrivacySection(),
+                _buildDataPrivacySection(context),
 
                 const SizedBox(height: 20),
               ],
@@ -84,13 +99,13 @@ class AboutUsPage extends StatelessWidget {
           ),
 
           // Floating Custom Bottom Nav - Same as other pages
-          _buildFloatingBottomNav(context),
+          navbar(context, 1),
         ],
       ),
     );
   }
 
-  Widget _buildHeroSection() {
+  Widget _buildHeroSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
@@ -98,14 +113,15 @@ class AboutUsPage extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.green.shade50, Colors.green.shade100],
-            ),
-          ),
+          decoration: context.cardStyles.greenTransparentCard,
+          // BoxDecoration(
+          //   borderRadius: BorderRadius.circular(16),
+          //   gradient: LinearGradient(
+          //     begin: Alignment.topLeft,
+          //     end: Alignment.bottomRight,
+          //     colors: [Colors.green.shade50, Colors.green.shade100],
+          //   ),
+          // ),
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
@@ -122,24 +138,13 @@ class AboutUsPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              const Text(
-                'UdyogMitra',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
+              Text('UdyogMitra', style: context.textStyles.titleLarge.green()),
 
               const SizedBox(height: 8),
 
-              const Text(
+              Text(
                 'Empowering Rural Dreams',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.green,
-                ),
+                style: context.textStyles.titleMedium.green(),
               ),
 
               const SizedBox(height: 16),
@@ -147,11 +152,7 @@ class AboutUsPage extends StatelessWidget {
               Text(
                 'UdyogMitra is your trusted companion for rural business growth, connecting you with opportunities, skills, and resources to build successful enterprises.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                  height: 1.5,
-                ),
+                style: context.textStyles.bodyMedium.copyWith(height: 1.5),
               ),
             ],
           ),
@@ -160,7 +161,7 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMissionVisionSection() {
+  Widget _buildMissionVisionSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
@@ -171,19 +172,16 @@ class AboutUsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Our Mission & Vision',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: context.textStyles.titleLarge,
               ),
 
               const SizedBox(height: 20),
 
               // Mission
               _buildMissionVisionItem(
+                context: context,
                 icon: Icons.rocket_launch,
                 title: 'Our Mission',
                 description:
@@ -195,6 +193,7 @@ class AboutUsPage extends StatelessWidget {
 
               // Vision
               _buildMissionVisionItem(
+                context: context,
                 icon: Icons.visibility,
                 title: 'Our Vision',
                 description:
@@ -209,6 +208,7 @@ class AboutUsPage extends StatelessWidget {
   }
 
   Widget _buildMissionVisionItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String description,
@@ -221,7 +221,7 @@ class AboutUsPage extends StatelessWidget {
           height: 48,
           width: 48,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withAlpha((0.1 * 255).round()),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color, size: 24),
@@ -233,24 +233,15 @@ class AboutUsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
+              Text(title, style: context.textStyles.titleMedium),
 
               const SizedBox(height: 8),
 
               Text(
                 description,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                  height: 1.5,
-                ),
+                style: context.textStyles.bodySmall
+                    .grey(context)
+                    .copyWith(height: 1.5),
               ),
             ],
           ),
@@ -259,7 +250,7 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOurStorySection() {
+  Widget _buildOurStorySection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
@@ -270,35 +261,24 @@ class AboutUsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Our Story',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
+              Text('Our Story', style: context.textStyles.titleLarge),
 
               const SizedBox(height: 16),
 
               Text(
                 'Born from a deep understanding of the challenges faced by rural entrepreneurs, UdyogMitra was created to democratize access to business opportunities and resources.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                  height: 1.6,
-                ),
+                style: context.textStyles.bodyMedium
+                    .grey(context)
+                    .copyWith(height: 1.6),
               ),
 
               const SizedBox(height: 16),
 
               Text(
                 'We believe that every individual, regardless of their location or background, deserves the opportunity to build a successful business. Through our platform, we provide the tools, knowledge, and connections needed to transform ideas into thriving enterprises.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                  height: 1.6,
-                ),
+                style: context.textStyles.bodyMedium
+                    .grey(context)
+                    .copyWith(height: 1.6),
               ),
             ],
           ),
@@ -307,7 +287,7 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCoreValuesSection() {
+  Widget _buildCoreValuesSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
@@ -318,19 +298,13 @@ class AboutUsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Why UdyogMitra?',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
+              Text('Why UdyogMitra?', style: context.textStyles.titleLarge),
 
               const SizedBox(height: 20),
 
               // Core values from the design
               _buildValueItem(
+                context: context,
                 icon: Icons.trending_up,
                 title: 'Simplified Business Growth',
                 description:
@@ -341,6 +315,7 @@ class AboutUsPage extends StatelessWidget {
               const SizedBox(height: 16),
 
               _buildValueItem(
+                context: context,
                 icon: Icons.people,
                 title: 'Local Language Support',
                 description:
@@ -351,6 +326,7 @@ class AboutUsPage extends StatelessWidget {
               const SizedBox(height: 16),
 
               _buildValueItem(
+                context: context,
                 icon: Icons.offline_bolt,
                 title: 'Offline Access',
                 description:
@@ -365,6 +341,7 @@ class AboutUsPage extends StatelessWidget {
   }
 
   Widget _buildValueItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String description,
@@ -373,9 +350,12 @@ class AboutUsPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withAlpha((0.05 * 255).round()),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
+        border: Border.all(
+          color: color.withAlpha((0.2 * 255).round()),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -383,7 +363,7 @@ class AboutUsPage extends StatelessWidget {
             height: 48,
             width: 48,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withAlpha((0.1 * 255).round()),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -395,24 +375,15 @@ class AboutUsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
+                Text(title, style: context.textStyles.cardTitleMedium),
 
                 const SizedBox(height: 4),
 
                 Text(
                   description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                    height: 1.4,
-                  ),
+                  style: context.textStyles.bodySmall
+                      .grey(context)
+                      .copyWith(height: 1.4),
                 ),
               ],
             ),
@@ -422,7 +393,7 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildKeyFeaturesSection() {
+  Widget _buildKeyFeaturesSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
@@ -433,14 +404,7 @@ class AboutUsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Key Features',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
+              Text('Key Features', style: context.textStyles.titleLarge),
 
               const SizedBox(height: 20),
 
@@ -497,6 +461,7 @@ class AboutUsPage extends StatelessWidget {
                         right: index == features.length - 1 ? 0 : 8,
                       ),
                       child: _buildFeatureCard(
+                        context: context,
                         icon: features[index]['icon'] as IconData,
                         title: features[index]['title'] as String,
                         description: features[index]['description'] as String,
@@ -514,6 +479,7 @@ class AboutUsPage extends StatelessWidget {
   }
 
   Widget _buildFeatureCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String description,
@@ -545,11 +511,7 @@ class AboutUsPage extends StatelessWidget {
 
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style: context.textStyles.labelMedium,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -559,11 +521,9 @@ class AboutUsPage extends StatelessWidget {
           Expanded(
             child: Text(
               description,
-              style: TextStyle(
-                fontSize: 11,
-                color: Colors.grey[600],
-                height: 1.2,
-              ),
+              style: context.textStyles.labelSmall
+                  .grey(context)
+                  .copyWith(height: 1.2),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -573,7 +533,7 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamSection() {
+  Widget _buildTeamSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
@@ -584,20 +544,14 @@ class AboutUsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Meet Our Team',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
+              Text('Meet Our Team', style: context.textStyles.titleLarge),
 
               const SizedBox(height: 20),
 
               // Horizontal scrollable team members
               SizedBox(
-                height: 140,
+                height: 145,
+                width: double.infinity,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -642,6 +596,7 @@ class AboutUsPage extends StatelessWidget {
                         right: index == teamMembers.length - 1 ? 0 : 8,
                       ),
                       child: _buildTeamMember(
+                        context: context,
                         name: teamMembers[index]['name'] as String,
                         role: teamMembers[index]['role'] as String,
                         color: teamMembers[index]['color'] as Color,
@@ -671,11 +626,7 @@ class AboutUsPage extends StatelessWidget {
                     Text(
                       'Founded in 2022, UdyogMitra emerged from a vision to bridge the digital gap in rural India. Our journey began with a simple mission: to make technology accessible and beneficial for rural entrepreneurs.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                        height: 1.5,
-                      ),
+                      style: context.textStyles.bodyMedium.grey(context),
                     ),
                   ],
                 ),
@@ -688,13 +639,14 @@ class AboutUsPage extends StatelessWidget {
   }
 
   Widget _buildTeamMember({
+    required BuildContext context,
     required String name,
     required String role,
     required Color color,
   }) {
     return Container(
-      width: 120,
-      padding: const EdgeInsets.all(12),
+      width: 125,
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: color.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
@@ -713,11 +665,7 @@ class AboutUsPage extends StatelessWidget {
 
           Text(
             name,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style: context.textStyles.labelSmall,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -727,9 +675,8 @@ class AboutUsPage extends StatelessWidget {
 
           Text(
             role,
-            style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+            style: context.textStyles.labelSmall.grey(context),
             textAlign: TextAlign.center,
-            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -737,7 +684,7 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTestimonialsSection() {
+  Widget _buildTestimonialsSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
@@ -748,19 +695,13 @@ class AboutUsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'User Testimonials',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
+              Text('User Testimonials', style: context.textStyles.titleLarge),
 
               const SizedBox(height: 20),
 
               // Testimonials
               _buildTestimonialCard(
+                context: context,
                 message:
                     'UdyogMitra helped me start my local business. The AI chatbot is incredibly helpful!',
                 name: 'Suresh, Maharashtra',
@@ -770,6 +711,7 @@ class AboutUsPage extends StatelessWidget {
               const SizedBox(height: 12),
 
               _buildTestimonialCard(
+                context: context,
                 message:
                     'Now I can access government schemes easily. This app has changed my life.',
                 name: 'Lakshmi, Karnataka',
@@ -783,6 +725,7 @@ class AboutUsPage extends StatelessWidget {
   }
 
   Widget _buildTestimonialCard({
+    required BuildContext context,
     required String message,
     required String name,
     required Color color,
@@ -808,30 +751,20 @@ class AboutUsPage extends StatelessWidget {
 
           Text(
             message,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
-              height: 1.4,
-              fontStyle: FontStyle.italic,
-            ),
+            style: context.textStyles.bodySmall
+                .grey(context)
+                .copyWith(fontStyle: FontStyle.italic, height: 1.4),
           ),
 
           const SizedBox(height: 8),
 
-          Text(
-            '- $name',
-            style: TextStyle(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          Text('- $name', style: context.textStyles.labelMedium),
         ],
       ),
     );
   }
 
-  Widget _buildImpactSection() {
+  Widget _buildImpactSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
@@ -842,14 +775,7 @@ class AboutUsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Our Impact',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
+              Text('Our Impact', style: context.textStyles.titleLarge),
 
               const SizedBox(height: 20),
 
@@ -860,9 +786,10 @@ class AboutUsPage extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 1.2,
+                childAspectRatio: 1.1,
                 children: [
                   _buildImpactCard(
+                    context: context,
                     icon: Icons.people,
                     title: 'Rural Farmers',
                     description: 'Empowering agricultural communities',
@@ -871,6 +798,7 @@ class AboutUsPage extends StatelessWidget {
                     // imagePath: 'assets/images/rural_farmers.jpg',
                   ),
                   _buildImpactCard(
+                    context: context,
                     icon: Icons.store,
                     title: 'Small Businesses',
                     description: 'Supporting local entrepreneurs',
@@ -880,6 +808,7 @@ class AboutUsPage extends StatelessWidget {
                     // imagePath: 'assets/images/small_businesses.jpg',
                   ),
                   _buildImpactCard(
+                    context: context,
                     icon: Icons.handyman,
                     title: 'Artisans',
                     description: 'Preserving traditional crafts',
@@ -888,6 +817,7 @@ class AboutUsPage extends StatelessWidget {
                     // imagePath: 'assets/images/artisans.jpg',
                   ),
                   _buildImpactCard(
+                    context: context,
                     icon: Icons.trending_up,
                     title: 'Economic Growth',
                     description: 'Driving rural development',
@@ -905,6 +835,7 @@ class AboutUsPage extends StatelessWidget {
   }
 
   Widget _buildImpactCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String description,
@@ -939,11 +870,7 @@ class AboutUsPage extends StatelessWidget {
 
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style: context.textStyles.labelMedium,
             textAlign: TextAlign.center,
           ),
 
@@ -951,11 +878,9 @@ class AboutUsPage extends StatelessWidget {
 
           Text(
             description,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey[600],
-              height: 1.2,
-            ),
+            style: context.textStyles.labelSmall
+                .grey(context)
+                .copyWith(height: 1.2),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -965,7 +890,7 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDataPrivacySection() {
+  Widget _buildDataPrivacySection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Card(
@@ -980,20 +905,14 @@ class AboutUsPage extends StatelessWidget {
                 children: [
                   Icon(Icons.security, color: Colors.green, size: 28),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Data Privacy',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
+                  Text('Data Privacy', style: context.textStyles.titleLarge),
                 ],
               ),
 
               const SizedBox(height: 20),
 
               _buildPrivacyItem(
+                context: context,
                 icon: Icons.lock,
                 title: 'Your data is encrypted and secure',
                 color: Colors.green,
@@ -1002,6 +921,7 @@ class AboutUsPage extends StatelessWidget {
               const SizedBox(height: 12),
 
               _buildPrivacyItem(
+                context: context,
                 icon: Icons.block,
                 title: 'We never share your information',
                 color: Colors.blue,
@@ -1010,6 +930,7 @@ class AboutUsPage extends StatelessWidget {
               const SizedBox(height: 12),
 
               _buildPrivacyItem(
+                context: context,
                 icon: Icons.verified_user,
                 title: 'GDPR compliant data handling',
                 color: Colors.orange,
@@ -1035,11 +956,7 @@ class AboutUsPage extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Your privacy is our priority. We are committed to protecting your personal information.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                          height: 1.4,
-                        ),
+                        style: context.textStyles.bodySmall.grey(context),
                       ),
                     ),
                   ],
@@ -1053,6 +970,7 @@ class AboutUsPage extends StatelessWidget {
   }
 
   Widget _buildPrivacyItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required Color color,
@@ -1071,112 +989,10 @@ class AboutUsPage extends StatelessWidget {
 
         const SizedBox(width: 12),
 
-        Expanded(
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
-          ),
-        ),
+        Expanded(child: Text(title, style: context.textStyles.labelMedium)),
 
         Icon(Icons.check_circle, color: color, size: 20),
       ],
-    );
-  }
-
-  Widget _buildFloatingBottomNav(BuildContext context) {
-    return Positioned(
-      left: 90,
-      right: 90,
-      bottom: 30,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: Container(
-          height: 64,
-          decoration: BoxDecoration(
-            color: Colors.green,
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(50),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavBarItem(
-                icon: Icons.home,
-                label: 'Home',
-                selected: false,
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, '/home');
-                },
-              ),
-              _NavBarItem(
-                icon: Icons.info_outline,
-                label: 'About Us',
-                selected: true, // This page is selected
-                onTap: () {
-                  // Already on About Us page
-                },
-              ),
-              _NavBarItem(
-                icon: Icons.person_outline,
-                label: 'Profile',
-                selected: false,
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, '/profile');
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavBarItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _NavBarItem({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: selected ? Colors.white : Colors.white.withOpacity(0.7),
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: selected ? Colors.white : Colors.white.withOpacity(0.7),
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

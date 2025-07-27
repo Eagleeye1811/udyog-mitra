@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 
 class HomeFeatureCard extends StatelessWidget {
   final IconData icon;
@@ -24,12 +26,12 @@ class HomeFeatureCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
           child: Row(
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.green.withAlpha(25), // ~0.1 opacity
+                  color: Colors.green.withAlpha(25),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.all(12),
@@ -40,17 +42,11 @@ class HomeFeatureCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                    Text(title, style: context.textStyles.cardTitleMedium),
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                      style: context.textStyles.bodySmall.grey(context),
                     ),
                   ],
                 ),

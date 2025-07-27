@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 // flutter_riverpod is our state management solution
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 // This imports our provider that manages user profile data
 import '../../../providers/user_profile_provider.dart';
 
@@ -61,10 +63,7 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          'Edit Location',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text('Edit Location', style: context.textStyles.titleLarge),
         content: TextField(
           controller: locationController,
           decoration: const InputDecoration(
@@ -113,10 +112,7 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text(
-            'Select Language',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+          title: Text('Select Language', style: context.textStyles.titleLarge),
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
@@ -173,14 +169,10 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.green[100]!, Colors.green[50]!],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
+        gradient: context.cardStyles.greenGradient,
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.1),
+            color: Colors.green.withAlpha(25),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -241,11 +233,7 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
           // Name
           Text(
             userProfile.fullName,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style: context.textStyles.titleLarge,
             textAlign: TextAlign.center,
           ),
 
@@ -257,7 +245,7 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withAlpha(204),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.green[200]!),
               ),
@@ -273,11 +261,7 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
                   Flexible(
                     child: Text(
                       userProfile.location,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[700],
-                      ),
+                      style: context.textStyles.bodySmall.black(),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -296,7 +280,7 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withAlpha(204),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.green[200]!),
               ),
@@ -307,11 +291,7 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
                   const SizedBox(width: 6),
                   Text(
                     userProfile.language,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[700],
-                    ),
+                    style: context.textStyles.bodySmall.black(),
                   ),
                   const SizedBox(width: 4),
                   Icon(Icons.edit, size: 14, color: Colors.green[700]),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 // Riverpod is a state management library for Flutter
 // It helps us share data between different parts of our app easily
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/app_theme_provider.dart';
 // This imports our provider that manages user profile data
 import 'package:udyogmitra/src/providers/user_profile_provider.dart';
 // These imports bring in all the widget components that make up our profile page
@@ -11,6 +13,7 @@ import 'package:udyogmitra/src/pages/profile/widgets/skills_section.dart';
 import 'package:udyogmitra/src/pages/profile/widgets/business_section.dart';
 import 'package:udyogmitra/src/pages/profile/widgets/applications_section.dart';
 import 'package:udyogmitra/src/pages/profile/widgets/additional_info_section.dart';
+import 'package:udyogmitra/src/widgets/navbar.dart';
 
 /// ProfilePage is the main screen that shows all user profile information
 ///
@@ -36,18 +39,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final userProfile = ref.watch(userProfileProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
-        ),
+        title: Text('Profile', style: context.textStyles.appBarTitle),
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
         centerTitle: true,
         automaticallyImplyLeading: false, // Remove the back arrow
         actions: [
+          IconButton(
+            icon: Icon(
+              ref.watch(themeModeProvider) == ThemeMode.dark
+                  ? Icons.dark_mode
+                  : Icons.light_mode,
+              color: Colors.green,
+            ),
+            onPressed: () {
+              ref.read(themeModeProvider.notifier).toggleTheme();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
@@ -113,59 +121,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
 
           // Floating Custom Bottom Nav - Exactly same as home screen
-          Positioned(
-            left: 90,
-            right: 90,
-            bottom: 30,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: Container(
-                height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(32),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(50),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _NavBarItem(
-                      icon: Icons.home,
-                      label: 'Home',
-                      selected:
-                          false, // Not selected since we're on Profile page
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
-                    ),
-                    _NavBarItem(
-                      icon: Icons.info_outline,
-                      label: 'About Us',
-                      selected: false,
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, '/about-us');
-                      },
-                    ),
-                    _NavBarItem(
-                      icon: Icons.person_outline,
-                      label: 'Profile',
-                      selected:
-                          true, // Currently selected since we're on Profile page
-                      onTap: () {
-                        // Already on profile page, no navigation needed
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          navbar(context, 2),
         ],
       ),
     );
@@ -390,44 +346,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               foregroundColor: Colors.white,
             ),
             child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// NavBarItem widget - exactly same as home screen for consistency
-class _NavBarItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _NavBarItem({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: selected ? Colors.white : Colors.white70),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: selected ? Colors.white : Colors.white70,
-              fontSize: 12,
-              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-            ),
           ),
         ],
       ),

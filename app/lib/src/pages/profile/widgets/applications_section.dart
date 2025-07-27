@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 import '../../../providers/user_profile_provider.dart';
 import '../../../models/user_profile.dart';
 
@@ -36,18 +38,14 @@ class _ApplicationsSectionState extends ConsumerState<ApplicationsSection> {
                 horizontal: 20,
                 vertical: 8,
               ),
-              title: const Text(
+              title: Text(
                 'Applications Overview',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                style: context.textStyles.titleMedium,
               ),
               subtitle: userProfile.applications.isNotEmpty
                   ? Text(
                       '${userProfile.applications.length} application${userProfile.applications.length != 1 ? 's' : ''}',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      style: context.textStyles.labelSmall.grey(context),
                     )
                   : null,
               trailing: Row(
@@ -122,7 +120,7 @@ class _ApplicationsSectionState extends ConsumerState<ApplicationsSection> {
         const SizedBox(height: 8),
         Text(
           'No applications yet',
-          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+          style: context.textStyles.bodySmall.grey(context),
         ),
         const SizedBox(height: 12),
         ElevatedButton.icon(
@@ -170,19 +168,12 @@ class _ApplicationsSectionState extends ConsumerState<ApplicationsSection> {
                       children: [
                         Text(
                           application.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
+                          style: context.textStyles.titleMedium,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           application.type.displayName,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
+                          style: context.textStyles.labelSmall.grey(context),
                         ),
                       ],
                     ),
@@ -232,7 +223,7 @@ class _ApplicationsSectionState extends ConsumerState<ApplicationsSection> {
                   const Spacer(),
                   Text(
                     'Applied: ${DateFormat('MMM dd, yyyy').format(application.dateApplied)}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    style: context.textStyles.labelSmall.grey(context),
                   ),
                 ],
               ),
@@ -258,11 +249,7 @@ class _ApplicationsSectionState extends ConsumerState<ApplicationsSection> {
           const SizedBox(width: 4),
           Text(
             status.displayName,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: status.color,
-            ),
+            style: context.textStyles.labelSmall.copyWith(color: status.color),
           ),
         ],
       ),
@@ -277,10 +264,7 @@ class _ApplicationsSectionState extends ConsumerState<ApplicationsSection> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text(
-            'Add Application',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+          title: Text('Add Application', style: context.textStyles.titleLarge),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -368,10 +352,7 @@ class _ApplicationsSectionState extends ConsumerState<ApplicationsSection> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          application.title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text(application.title, style: context.textStyles.titleLarge),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,18 +394,8 @@ class _ApplicationsSectionState extends ConsumerState<ApplicationsSection> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
+            Text(label, style: context.textStyles.labelSmall.grey(context)),
+            Text(value, style: context.textStyles.bodyMedium),
           ],
         ),
       ],
@@ -442,9 +413,9 @@ class _ApplicationsSectionState extends ConsumerState<ApplicationsSection> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text(
+          title: Text(
             'Update Application Status',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: context.textStyles.titleLarge,
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,

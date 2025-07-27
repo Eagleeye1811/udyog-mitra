@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 import '../../../providers/user_profile_provider.dart';
 import '../../../models/user_profile.dart';
 
@@ -28,14 +30,7 @@ class BusinessSection extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'My Businesses',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
+                  Text('My Businesses', style: context.textStyles.titleLarge),
                   IconButton(
                     onPressed: () => _showAddBusinessDialog(context, ref),
                     icon: Icon(Icons.add_business, color: Colors.green[600]),
@@ -63,7 +58,7 @@ class BusinessSection extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           'No businesses registered yet',
-          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+          style: context.textStyles.bodySmall.grey(context),
         ),
         const SizedBox(height: 12),
         ElevatedButton.icon(
@@ -103,7 +98,7 @@ class BusinessSection extends ConsumerWidget {
           side: BorderSide(color: Colors.grey[200]!),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -115,19 +110,12 @@ class BusinessSection extends ConsumerWidget {
                       children: [
                         Text(
                           business.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
+                          style: context.textStyles.titleMedium,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           business.description,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
+                          style: context.textStyles.bodySmall.grey(context),
                         ),
                       ],
                     ),
@@ -173,11 +161,11 @@ class BusinessSection extends ConsumerWidget {
 
               Row(
                 children: [
-                  _buildStatusBadge(business.status),
+                  _buildStatusBadge(context, business.status),
                   const Spacer(),
                   Text(
                     'Created: ${DateFormat('MMM dd, yyyy').format(business.createdAt)}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    style: context.textStyles.labelSmall.grey(context),
                   ),
                 ],
               ),
@@ -215,7 +203,7 @@ class BusinessSection extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBadge(BusinessStatus status) {
+  Widget _buildStatusBadge(BuildContext context, BusinessStatus status) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -225,11 +213,7 @@ class BusinessSection extends ConsumerWidget {
       ),
       child: Text(
         status.displayName,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: status.color,
-        ),
+        style: context.textStyles.labelSmall.copyWith(color: status.color),
       ),
     );
   }
@@ -241,10 +225,7 @@ class BusinessSection extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          'Add New Business',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text('Add New Business', style: context.textStyles.titleLarge),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -329,10 +310,7 @@ class BusinessSection extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          'Edit Business',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text('Edit Business', style: context.textStyles.titleLarge),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

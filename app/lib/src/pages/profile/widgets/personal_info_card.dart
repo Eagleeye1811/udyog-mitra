@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 import '../../../providers/user_profile_provider.dart';
 
 class PersonalInfoCard extends ConsumerWidget {
@@ -26,13 +28,9 @@ class PersonalInfoCard extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Personal Information',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                    style: context.textStyles.titleLarge,
                   ),
                   IconButton(
                     onPressed: () => _showEditDialog(context, ref),
@@ -44,6 +42,7 @@ class PersonalInfoCard extends ConsumerWidget {
               const SizedBox(height: 16),
 
               _buildInfoRow(
+                context,
                 'Full Name',
                 userProfile.fullName,
                 Icons.person_outline,
@@ -51,11 +50,17 @@ class PersonalInfoCard extends ConsumerWidget {
 
               const SizedBox(height: 12),
 
-              _buildInfoRow('Email', userProfile.email, Icons.email_outlined),
+              _buildInfoRow(
+                context,
+                'Email',
+                userProfile.email,
+                Icons.email_outlined,
+              ),
 
               const SizedBox(height: 12),
 
               _buildInfoRow(
+                context,
                 'Phone Number',
                 userProfile.phoneNumber,
                 Icons.phone_outlined,
@@ -63,11 +68,21 @@ class PersonalInfoCard extends ConsumerWidget {
 
               const SizedBox(height: 12),
 
-              _buildInfoRow('Gender', userProfile.gender, Icons.person_outline),
+              _buildInfoRow(
+                context,
+                'Gender',
+                userProfile.gender,
+                Icons.person_outline,
+              ),
 
               const SizedBox(height: 12),
 
-              _buildInfoRow('Language', userProfile.language, Icons.translate),
+              _buildInfoRow(
+                context,
+                'Language',
+                userProfile.language,
+                Icons.translate,
+              ),
             ],
           ),
         ),
@@ -75,7 +90,12 @@ class PersonalInfoCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -85,23 +105,9 @@ class PersonalInfoCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[600],
-                ),
-              ),
+              Text(label, style: context.textStyles.bodySmall.grey(context)),
               const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
+              Text(value, style: context.textStyles.bodyMedium),
             ],
           ),
         ),
@@ -130,9 +136,9 @@ class PersonalInfoCard extends ConsumerWidget {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text(
+          title: Text(
             'Edit Personal Information',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: context.textStyles.titleLarge,
           ),
           content: SingleChildScrollView(
             child: Column(

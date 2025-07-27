@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 import '../../../providers/user_profile_provider.dart';
 
 class SkillsSection extends ConsumerWidget {
@@ -26,14 +28,7 @@ class SkillsSection extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Skills',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
+                  Text('Skills', style: context.textStyles.titleLarge),
                   IconButton(
                     onPressed: () => _showEditSkillsDialog(context, ref),
                     icon: Icon(Icons.edit, color: Colors.green[600]),
@@ -61,7 +56,7 @@ class SkillsSection extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           'No skills added yet',
-          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+          style: context.textStyles.bodySmall.grey(context),
         ),
         const SizedBox(height: 12),
         ElevatedButton.icon(
