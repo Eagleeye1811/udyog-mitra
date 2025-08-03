@@ -135,22 +135,56 @@ Skills Available: ${widget.userSkills.join(', ')}
     } else if (apiEvaluation is String) {
       // Handle case where API returns raw text
       summary = apiEvaluation;
-      
+
       // Try to extract score from text
       RegExp scorePattern = RegExp(r'(\d+(?:\.\d+)?)\s*(?:out of|\/)\s*10');
       Match? scoreMatch = scorePattern.firstMatch(apiEvaluation);
       if (scoreMatch != null) {
         score = scoreMatch.group(1) ?? '7.5';
       }
-      
+
       // Try to extract sections from text
-      suggestions = _extractSection(apiEvaluation, ['strength', 'advantage', 'benefit', 'positive']);
-      challenges = _extractSection(apiEvaluation, ['challenge', 'risk', 'weakness', 'limitation']);
-      marketDemand = _extractSection(apiEvaluation, ['market', 'demand', 'customer', 'target']);
-      competitors = _extractSection(apiEvaluation, ['competitor', 'competition', 'rival']);
-      investmentPotential = _extractSection(apiEvaluation, ['investment', 'fund', 'capital', 'money']);
-      govSchemes = _extractSection(apiEvaluation, ['government', 'scheme', 'policy', 'support']);
-      growthOpportunities = _extractSection(apiEvaluation, ['growth', 'expansion', 'scale', 'opportunity']);
+      suggestions = _extractSection(apiEvaluation, [
+        'strength',
+        'advantage',
+        'benefit',
+        'positive',
+      ]);
+      challenges = _extractSection(apiEvaluation, [
+        'challenge',
+        'risk',
+        'weakness',
+        'limitation',
+      ]);
+      marketDemand = _extractSection(apiEvaluation, [
+        'market',
+        'demand',
+        'customer',
+        'target',
+      ]);
+      competitors = _extractSection(apiEvaluation, [
+        'competitor',
+        'competition',
+        'rival',
+      ]);
+      investmentPotential = _extractSection(apiEvaluation, [
+        'investment',
+        'fund',
+        'capital',
+        'money',
+      ]);
+      govSchemes = _extractSection(apiEvaluation, [
+        'government',
+        'scheme',
+        'policy',
+        'support',
+      ]);
+      growthOpportunities = _extractSection(apiEvaluation, [
+        'growth',
+        'expansion',
+        'scale',
+        'opportunity',
+      ]);
     }
 
     // Parse the score and create sub-scores
@@ -282,7 +316,7 @@ Skills Available: ${widget.userSkills.join(', ')}
     // Try each keyword to find the best match
     for (String keyword in keywords) {
       String lowerKeyword = keyword.toLowerCase();
-      
+
       // Try to find section headers and extract content
       List<String> commonHeaders = [
         lowerKeyword,
@@ -300,20 +334,25 @@ Skills Available: ${widget.userSkills.join(', ')}
         if (headerIndex != -1) {
           // Find the start of content after the header
           int contentStart = headerIndex + header.length;
-          
+
           // Skip any colons, asterisks, or whitespace
-          while (contentStart < text.length && 
-                 (text[contentStart] == ':' || text[contentStart] == '*' || 
-                  text[contentStart] == ' ' || text[contentStart] == '\n')) {
+          while (contentStart < text.length &&
+              (text[contentStart] == ':' ||
+                  text[contentStart] == '*' ||
+                  text[contentStart] == ' ' ||
+                  text[contentStart] == '\n')) {
             contentStart++;
           }
 
           // Find the end of this section (next header or end of text)
           int contentEnd = text.length;
           List<String> nextSectionMarkers = ['##', '**', '\n\n'];
-          
+
           for (String marker in nextSectionMarkers) {
-            int markerIndex = text.indexOf(marker, contentStart + 50); // Skip immediate area
+            int markerIndex = text.indexOf(
+              marker,
+              contentStart + 50,
+            ); // Skip immediate area
             if (markerIndex != -1 && markerIndex < contentEnd) {
               contentEnd = markerIndex;
             }
@@ -321,11 +360,11 @@ Skills Available: ${widget.userSkills.join(', ')}
 
           // Extract and clean the content
           String content = text.substring(contentStart, contentEnd).trim();
-          
+
           // Remove excessive newlines and clean up
           content = content.replaceAll(RegExp(r'\n{3,}'), '\n\n');
           content = content.replaceAll(RegExp(r'^\*+|^\-+|^#+'), '').trim();
-          
+
           if (content.isNotEmpty) {
             return content;
           }
@@ -334,8 +373,11 @@ Skills Available: ${widget.userSkills.join(', ')}
     }
 
     // If no specific section found, look for keywords in sentences
-    List<String> sentences = text.split(RegExp(r'[.!?]')).where((s) => s.trim().isNotEmpty).toList();
-    
+    List<String> sentences = text
+        .split(RegExp(r'[.!?]'))
+        .where((s) => s.trim().isNotEmpty)
+        .toList();
+
     for (String keyword in keywords) {
       String lowerKeyword = keyword.toLowerCase();
       for (String sentence in sentences) {
@@ -350,12 +392,12 @@ Skills Available: ${widget.userSkills.join(', ')}
         }
       }
     }
-    
+
     // Last resort: return a portion of the text
     if (sentences.length > 2) {
       return sentences.take(3).join('. ').trim() + '.';
     }
-    
+
     return text.length > 200 ? text.substring(0, 200) + '...' : text;
   }
 
