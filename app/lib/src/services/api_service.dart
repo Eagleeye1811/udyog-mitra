@@ -78,13 +78,14 @@ class ApiService {
 
   // Chat with the system
   static Future<Map<String, dynamic>> chat({
+    required String userId,
     required String message,
     CancelToken? cancelToken,
   }) async {
     try {
       final response = await _dio.post(
         '/chat',
-        data: {'message': message},
+        data: {'user_id': userId, 'message': message},
         cancelToken: cancelToken,
       );
       return response.data;

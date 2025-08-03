@@ -155,7 +155,7 @@ final appTypographyLight = AppTypography(
   bodySmall: TextStyle(
     color: Colors.black,
     fontSize: 16,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
   ),
 
   labelLarge: TextStyle(
@@ -191,8 +191,8 @@ final appTypographyLight = AppTypography(
   ),
 
   greenColor: Colors.green,
-  greyColor: Colors.grey.shade700,
-  darkGreyColor: Colors.grey.shade800,
+  greyColor: Colors.grey.shade800,
+  darkGreyColor: Colors.grey.shade900,
 );
 
 // Dark Theme AppTypography
@@ -232,7 +232,7 @@ final appTypographyDark = AppTypography(
   bodySmall: TextStyle(
     color: Colors.white,
     fontSize: 16,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
   ),
 
   labelLarge: TextStyle(
@@ -269,5 +269,5 @@ final appTypographyDark = AppTypography(
 
   greenColor: const Color.fromARGB(255, 38, 117, 41),
   greyColor: Colors.grey.shade300,
-  darkGreyColor: Colors.grey.shade300,
+  darkGreyColor: Colors.grey.shade400,
 );

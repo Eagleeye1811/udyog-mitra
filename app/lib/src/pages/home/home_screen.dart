@@ -81,9 +81,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Text(
                           'UdyogMitra is more than an app — it’s your trusted partner. Whether you’re starting a business, showcasing your skills, or seeking guidance and government support, we’re here to help.\n\n'
                           'Your dreams, our mission. Let’s build an Aatmanirbhar Bharat together!',
-                          style: context.textStyles.bodyMedium.darkGrey(
-                            context,
-                          ),
+                          style: context.textStyles.bodyMedium,
                         ),
                       ],
                     ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 
 class SkillInputScreen extends StatefulWidget {
   final Function(List<String>) onSkillsSubmitted;
@@ -73,9 +75,9 @@ class _SkillInputScreenState extends State<SkillInputScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Enter your skills to get personalized business ideas that match your expertise.',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: context.textStyles.bodySmall.darkGrey(context),
           ),
           const SizedBox(height: 24),
 
@@ -126,13 +128,16 @@ class _SkillInputScreenState extends State<SkillInputScreen> {
               runSpacing: 8,
               children: _skills.map((skill) {
                 return Chip(
-                  label: Text(skill),
-                  backgroundColor: const Color(0xFF4CAF50),
-                  labelStyle: const TextStyle(color: Colors.white),
-                  deleteIcon: const Icon(
+                  label: Text(
+                    skill,
+                    style: context.textStyles.labelMedium.white(),
+                  ),
+                  backgroundColor: const Color(0xFF2E7D32),
+                  labelStyle: context.textStyles.bodySmall,
+                  deleteIcon: Icon(
                     Icons.close,
                     size: 18,
-                    color: Colors.white,
+                    color: Colors.white70,
                   ),
                   onDeleted: () => _removeSkill(skill),
                 );
@@ -168,10 +173,9 @@ class _SkillInputScreenState extends State<SkillInputScreen> {
                     ),
                     title: Text(
                       suggestion,
-                      style: TextStyle(
-                        color: isAdded ? Colors.grey : Colors.black,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: isAdded
+                          ? context.textStyles.labelLarge
+                          : context.textStyles.bodySmall.grey(context),
                     ),
                     onTap: isAdded ? null : () => _addSkill(suggestion),
                     enabled: !isAdded,
@@ -189,7 +193,11 @@ class _SkillInputScreenState extends State<SkillInputScreen> {
                 onPressed: widget.onBack,
                 child: const Text(
                   'Back',
-                  style: TextStyle(color: Color(0xFF2E7D32)),
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Color(0xFF2E7D32),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const Spacer(),
@@ -205,7 +213,10 @@ class _SkillInputScreenState extends State<SkillInputScreen> {
                     vertical: 12,
                   ),
                 ),
-                child: const Text('Generate Business Ideas'),
+                child: Text(
+                  'Generate Business Ideas',
+                  style: context.textStyles.labelSmall.white().bold(),
+                ),
               ),
             ],
           ),
