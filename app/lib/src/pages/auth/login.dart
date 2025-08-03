@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 import 'package:udyogmitra/src/pages/auth/forgot-pass.dart';
 import 'package:udyogmitra/src/services/google_auth_service.dart';
-import 'package:udyogmitra/src/widgets/google_signin_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:udyogmitra/src/providers/user_profile_provider.dart';
 
@@ -183,15 +184,15 @@ class _LoginPageState extends ConsumerState<LoginPage>
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withAlpha(51),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.4),
+                            color: Colors.white.withAlpha(102),
                             width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withAlpha(26),
                               blurRadius: 10,
                               offset: const Offset(0, 5),
                             ),
@@ -219,7 +220,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                         'Sign in to continue your journey',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white.withOpacity(0.95),
+                          color: Colors.white.withAlpha(24),
                         ),
                       ),
                       const SizedBox(height: 48),
@@ -232,7 +233,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withAlpha(26),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -252,6 +253,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                               ),
                               child: TextField(
                                 controller: _emailController,
+                                style: context.textStyles.bodyMedium.black(),
                                 decoration: InputDecoration(
                                   labelText: 'Email',
                                   labelStyle: TextStyle(
@@ -281,6 +283,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                               ),
                               child: TextField(
                                 controller: _passwordController,
+                                style: context.textStyles.bodyMedium.black(),
                                 decoration: InputDecoration(
                                   labelText: 'Password',
                                   labelStyle: TextStyle(
@@ -324,10 +327,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                                 },
                                 child: Text(
                                   'Forgot Password?',
-                                  style: TextStyle(
-                                    color: Colors.green.shade600,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  style: context.textStyles.labelSmall.green(),
                                 ),
                               ),
                             ),
@@ -521,10 +521,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
                         children: [
                           Text(
                             "Don't have an account? ",
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.95),
-                              fontSize: 16,
-                            ),
+                            style: context.textStyles.bodyMedium
+                                .white()
+                                .copyWith(fontWeight: FontWeight.w600),
                           ),
                           GestureDetector(
                             onTap: widget.onToggle,
@@ -533,13 +532,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
                                 horizontal: 4,
                                 vertical: 2,
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Sign Up',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: context.textStyles.bodyMedium
+                                    .white()
+                                    .copyWith(fontWeight: FontWeight.w800),
                               ),
                             ),
                           ),

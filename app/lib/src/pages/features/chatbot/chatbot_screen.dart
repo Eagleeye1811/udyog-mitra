@@ -16,9 +16,11 @@ class ChatbotScreen extends ConsumerStatefulWidget {
 
 class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   Map<String, dynamic>? _chatbotResponse;
-  bool _isLoading = true;
+  bool _isLoading = false;
   String? _errorMessage;
   CancelToken? _cancelToken;
+
+  bool hasAnimated = false;
 
   final List<ChatMessage> messages = [];
 
@@ -38,6 +40,8 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   }
 
   void sendPrompt(String userId) async {
+    _isLoading = true;
+    hasAnimated = false;
     final prompt = _promptController.text.trim();
     if (prompt.isEmpty) return;
 
@@ -63,13 +67,13 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       final response = await ApiService.chat(userId: userId, message: prompt);
       final chatbotResponse = response["message"];
 
-      setState(() {
-        messages.removeLast();
-      });
+      hasAnimated = false;
 
       setState(() {
-        messages.add(ChatMessage(isUser: false, message: chatbotResponse));
-        _isLoading = false;
+        messages[messages.length - 1] = ChatMessage(
+          isUser: false,
+          message: chatbotResponse,
+        );
       });
     } catch (e) {
       if (_cancelToken?.isCancelled == false) {
@@ -79,6 +83,15 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
         });
       }
     }
+  }
+
+  void setLoading(bool isLoading) {
+    setState(() {
+      _isLoading = isLoading;
+      if (!isLoading) {
+        hasAnimated = true;
+      }
+    });
   }
 
   @override
@@ -127,8 +140,9 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                   key: ValueKey('${msg.isUser}-${msg.message}'),
                   isUser: msg.isUser,
                   message: msg.message,
-                  animate: isLast,
+                  animate: !msg.isUser && isLast && !hasAnimated,
                   scrollController: _scrollController,
+                  setLoading: setLoading,
                 );
               },
             ),
@@ -146,6 +160,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
               Expanded(
                 child: TextField(
                   controller: _promptController,
+                  enabled: !_isLoading,
                   decoration: InputDecoration(
                     hintText: "Ask Something ...",
                     border: OutlineInputBorder(
