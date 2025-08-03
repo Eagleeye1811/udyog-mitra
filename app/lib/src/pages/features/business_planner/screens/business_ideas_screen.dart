@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import '../../../../services/api_service.dart';
+import '../../../../services/api_models.dart';
 
 class BusinessIdeasScreen extends StatefulWidget {
   final List<String> skills;
@@ -20,6 +23,8 @@ class _BusinessIdeasScreenState extends State<BusinessIdeasScreen> {
   List<Map<String, dynamic>> _businessIdeas = [];
   bool _isLoading = true;
   int? _selectedIdeaIndex;
+  String? _errorMessage;
+  CancelToken? _cancelToken;
 
   @override
   void initState() {
@@ -27,101 +32,138 @@ class _BusinessIdeasScreenState extends State<BusinessIdeasScreen> {
     _generateBusinessIdeas();
   }
 
-  void _generateBusinessIdeas() {
-    // Simulate API call to generate business ideas based on skills
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _businessIdeas = _getGeneratedIdeas();
-        _isLoading = false;
-      });
-    });
+  @override
+  void dispose() {
+    _cancelToken?.cancel('Widget disposed');
+    super.dispose();
   }
 
-  List<Map<String, dynamic>> _getGeneratedIdeas() {
-    // This would normally come from your backend API
-    return [
-      {
-        'title': 'Freelance Digital Agency',
+  void _generateBusinessIdeas() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
+      // Cancel any previous request
+      _cancelToken?.cancel();
+      _cancelToken = CancelToken();
+
+      // Make API call with user skills
+      final response = await BusinessPlannerApiService.generateBusinessIdeas(
+        skill: widget.skills.join(
+          ', ',
+        ), // Convert list to comma-separated string
+        location: 'India', // Can be made configurable
+        cancelToken: _cancelToken,
+      );
+
+      if (_cancelToken?.isCancelled == false) {
+        setState(() {
+          _businessIdeas = _convertApiResponseToIdeas(response);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (_cancelToken?.isCancelled == false) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Failed to generate business ideas: ${e.toString()}';
+        });
+      }
+    }
+  }
+
+  List<Map<String, dynamic>> _convertApiResponseToIdeas(
+    SkillMappingResponse apiResponse,
+  ) {
+    // Convert API response to the format expected by the UI
+    List<Map<String, dynamic>> ideas = [];
+
+    try {
+      // Extract business ideas from the SkillMappingResponse
+      for (int i = 0; i < apiResponse.businessIdeas.length; i++) {
+        var idea = apiResponse.businessIdeas[i];
+        ideas.add({
+          'title': idea.title,
+          'description': idea.description,
+          'match_percentage': 85 + (i * 2), // Generate varying percentages
+          'investment_range': _getInvestmentRange(i),
+          'market_potential': _getMarketPotential(i),
+          'difficulty': _getDifficulty(i),
+          'timeframe': _getTimeframe(i),
+          'revenue_model': _getRevenueModel(i),
+          'key_skills_used': widget.skills
+              .take(3)
+              .toList(), // Use first 3 skills
+        });
+      }
+
+      // If no ideas, create a fallback
+      if (ideas.isEmpty) {
+        ideas.add({
+          'title': 'Your Personalized Business Opportunity',
+          'description':
+              apiResponse.introduction + '\n\n' + apiResponse.conclusion,
+          'match_percentage': 88,
+          'investment_range': 'Low to Medium',
+          'market_potential': 'High',
+          'difficulty': 'Medium',
+          'timeframe': '3-6 months',
+          'revenue_model': 'Service-based revenue',
+          'key_skills_used': widget.skills,
+        });
+      }
+    } catch (e) {
+      // Fallback: create a default idea
+      ideas.add({
+        'title': 'Your Personalized Business Opportunity',
         'description':
-            'Start a digital marketing agency offering web development, graphic design, and social media management services.',
-        'match_percentage': 95,
-        'investment_range': 'Low (₹50,000 - ₹2,00,000)',
+            'Based on your skills: ${widget.skills.join(', ')}, we recommend exploring opportunities in these areas.',
+        'match_percentage': 88,
+        'investment_range': 'Low to Medium',
         'market_potential': 'High',
         'difficulty': 'Medium',
         'timeframe': '3-6 months',
-        'revenue_model': 'Project-based and retainer fees',
-        'key_skills_used': widget.skills
-            .where(
-              (skill) => [
-                'Digital Marketing',
-                'Web Development',
-                'Graphic Design',
-                'Social Media Management',
-              ].any((s) => skill.toLowerCase().contains(s.toLowerCase())),
-            )
-            .toList(),
-      },
-      {
-        'title': 'Online Course Platform',
-        'description':
-            'Create and sell online courses based on your expertise in various skills.',
-        'match_percentage': 88,
-        'investment_range': 'Low (₹25,000 - ₹1,00,000)',
-        'market_potential': 'Very High',
-        'difficulty': 'Easy',
-        'timeframe': '2-4 months',
-        'revenue_model': 'Course sales and subscription',
-        'key_skills_used': widget.skills
-            .where(
-              (skill) => [
-                'Teaching',
-                'Content Writing',
-                'Video Editing',
-              ].any((s) => skill.toLowerCase().contains(s.toLowerCase())),
-            )
-            .toList(),
-      },
-      {
-        'title': 'E-commerce Store',
-        'description':
-            'Launch an online store selling products related to your skills and interests.',
-        'match_percentage': 82,
-        'investment_range': 'Medium (₹1,00,000 - ₹5,00,000)',
-        'market_potential': 'High',
-        'difficulty': 'Medium',
-        'timeframe': '4-8 months',
-        'revenue_model': 'Product sales and affiliate marketing',
-        'key_skills_used': widget.skills
-            .where(
-              (skill) => [
-                'Digital Marketing',
-                'Customer Service',
-                'Data Analysis',
-              ].any((s) => skill.toLowerCase().contains(s.toLowerCase())),
-            )
-            .toList(),
-      },
-      {
-        'title': 'Consulting Business',
-        'description':
-            'Offer consulting services in your area of expertise to businesses and individuals.',
-        'match_percentage': 90,
-        'investment_range': 'Very Low (₹10,000 - ₹50,000)',
-        'market_potential': 'Medium',
-        'difficulty': 'Easy',
-        'timeframe': '1-3 months',
-        'revenue_model': 'Hourly consulting fees',
-        'key_skills_used': widget.skills
-            .where(
-              (skill) => [
-                'Consulting',
-                'Project Management',
-                'Data Analysis',
-              ].any((s) => skill.toLowerCase().contains(s.toLowerCase())),
-            )
-            .toList(),
-      },
+        'revenue_model': 'Service-based revenue',
+        'key_skills_used': widget.skills,
+      });
+    }
+
+    return ideas;
+  }
+
+  String _getInvestmentRange(int index) {
+    const ranges = [
+      'Low (₹50,000 - ₹1,00,000)',
+      'Medium (₹1,00,000 - ₹5,00,000)',
+      'High (₹5,00,000 - ₹10,00,000)',
     ];
+    return ranges[index % ranges.length];
+  }
+
+  String _getMarketPotential(int index) {
+    const potentials = ['High', 'Very High', 'Medium'];
+    return potentials[index % potentials.length];
+  }
+
+  String _getDifficulty(int index) {
+    const difficulties = ['Easy', 'Medium', 'Medium-Hard'];
+    return difficulties[index % difficulties.length];
+  }
+
+  String _getTimeframe(int index) {
+    const timeframes = ['2-4 months', '3-6 months', '6-12 months'];
+    return timeframes[index % timeframes.length];
+  }
+
+  String _getRevenueModel(int index) {
+    const models = [
+      'Service-based revenue',
+      'Product sales',
+      'Subscription model',
+    ];
+    return models[index % models.length];
   }
 
   Color _getDifficultyColor(String difficulty) {
@@ -225,6 +267,54 @@ class _BusinessIdeasScreenState extends State<BusinessIdeasScreen> {
                         color: Colors.grey.shade600,
                       ),
                       textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ] else if (_errorMessage != null) ...[
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red.shade400,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Oops! Something went wrong',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: _generateBusinessIdeas,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Try Again'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E7D32),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
                   ],
                 ),
