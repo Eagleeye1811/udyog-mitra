@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 import '../business_planner/screens/idea_evaluation_screen.dart';
 import '../business_planner/screens/roadmap_generation_screen.dart';
 import '../../../services/api_service.dart';
@@ -98,16 +100,12 @@ class _IdeaEvaluatorScreenState extends State<IdeaEvaluatorScreen> {
               children: [
                 Text(
                   _getStepTitle(_currentStep),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: context.textStyles.bodyMedium,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Step ${_currentStep + 1} of 3',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  style: context.textStyles.labelSmall.grey(context),
                 ),
               ],
             ),

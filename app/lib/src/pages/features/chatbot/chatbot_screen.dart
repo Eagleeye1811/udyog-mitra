@@ -1,76 +1,96 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/app_theme_provider.dart';
 import 'package:udyogmitra/src/pages/features/chatbot/chat_bubble.dart';
+import 'package:udyogmitra/src/providers/user_profile_provider.dart';
+import 'package:udyogmitra/src/services/api_service.dart';
 
-class ChatbotScreen extends StatefulWidget {
+class ChatbotScreen extends ConsumerStatefulWidget {
   const ChatbotScreen({super.key});
 
   @override
-  State<ChatbotScreen> createState() => _ChatbotScreenState();
+  ConsumerState<ChatbotScreen> createState() => _ChatbotScreenState();
 }
 
-class _ChatbotScreenState extends State<ChatbotScreen> {
-  final messages = [
-    {
-      "isUser": false,
-      "message":
-          "Hello! I'm your UdyogMitra assistant. How can I help you with your career or business goals today?",
-    },
-    {"isUser": true, "message": "What business can I start with HTML skills?"},
-    {
-      "isUser": false,
-      "message":
-          "You can start:\nA freelance web development service\nA portfolio-building agency\nA static site generator tool",
-    },
-    {"isUser": true, "message": "Prompt3"},
-    {"isUser": false, "message": "Response3"},
-  ];
+class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
+  Map<String, dynamic>? _chatbotResponse;
+  bool _isLoading = true;
+  String? _errorMessage;
+  CancelToken? _cancelToken;
+
+  final List<ChatMessage> messages = [];
+
   final TextEditingController _promptController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  void sendPrompt() {
+  @override
+  void initState() {
+    super.initState();
+    messages.add(
+      ChatMessage(
+        isUser: false,
+        message:
+            "Hello! I'm your UdyogMitra assistant. How can I help you with your career or business goals today?",
+      ),
+    );
+  }
+
+  void sendPrompt(String userId) async {
     final prompt = _promptController.text.trim();
     if (prompt.isEmpty) return;
 
     setState(() {
-      messages.add({"isUser": true, "message": prompt});
+      messages.add(ChatMessage(isUser: true, message: prompt));
     });
 
     _promptController.clear();
 
     setState(() {
-      messages.add({"isUser": false, "message": ". . ."});
+      messages.add(ChatMessage(isUser: false, message: ". . ."));
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.animateTo(
-        _scrollController.position.minScrollExtent,
-        duration: Duration(seconds: 2),
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 400),
         curve: Curves.easeOut,
       );
     });
 
-    Future.delayed(Duration(milliseconds: 500), () {
+    try {
+      final response = await ApiService.chat(userId: userId, message: prompt);
+      final chatbotResponse = response["message"];
+
       setState(() {
         messages.removeLast();
-        messages.add({"isUser": false, "message": "Response"});
       });
-    });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.minScrollExtent,
-        duration: Duration(milliseconds: 600),
-        curve: Curves.easeOut,
-      );
-    });
+      setState(() {
+        messages.add(ChatMessage(isUser: false, message: chatbotResponse));
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (_cancelToken?.isCancelled == false) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Failed to evaluate idea: ${e.toString()}';
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final userProfile = ref.watch(userProfileProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("UdyogMitra Chatbot"),
-        backgroundColor: Colors.white,
+        title: Text(
+          "UdyogMitra Chatbot",
+          style: context.textStyles.appBarTitle,
+        ),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -78,27 +98,46 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              ref.watch(themeModeProvider) == ThemeMode.dark
+                  ? Icons.dark_mode
+                  : Icons.light_mode,
+              color: Colors.green,
+            ),
+            onPressed: () {
+              ref.read(themeModeProvider.notifier).toggleTheme();
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              reverse: true,
               itemCount: messages.length,
               scrollDirection: Axis.vertical,
-              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 0),
               itemBuilder: (context, index) {
-                final msg = messages[messages.length - index - 1];
+                final msg = messages[index];
+                final isLast = index == messages.length - 1;
                 return ChatBubble(
-                  isUser: msg["isUser"] as bool,
-                  message: msg["message"] as String,
+                  key: ValueKey('${msg.isUser}-${msg.message}'),
+                  isUser: msg.isUser,
+                  message: msg.message,
+                  animate: isLast,
+                  scrollController: _scrollController,
                 );
               },
             ),
           ),
+
+          const SizedBox(height: 10),
         ],
       ),
+
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -114,15 +153,30 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
+                  onSubmitted: (_) {
+                    sendPrompt(userProfile!.id);
+                  },
                 ),
               ),
               const SizedBox(width: 10),
               IconButton(icon: const Icon(Icons.mic), onPressed: () {}),
-              IconButton(icon: const Icon(Icons.send), onPressed: sendPrompt),
+              IconButton(
+                icon: const Icon(Icons.send),
+                onPressed: () {
+                  sendPrompt(userProfile!.id);
+                },
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class ChatMessage {
+  final bool isUser;
+  final String message;
+
+  ChatMessage({required this.isUser, required this.message});
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/api_models.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 
 class RoadmapGenerationScreen extends StatefulWidget {
   final Map<String, dynamic> evaluationResult;
@@ -613,20 +615,13 @@ Your personalized roadmap is being finalized with AI-powered insights.
                     const SizedBox(height: 24),
                     Text(
                       'AI is crafting your roadmap...',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
-                      ),
+                      style: context.textStyles.bodyMedium.grey(context),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Creating a personalized business roadmap with AI insights',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
+                      style: context.textStyles.bodySmall.darkGrey(context),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -774,7 +769,7 @@ Your personalized roadmap is being finalized with AI-powered insights.
             ),
             subtitle: Text(
               'Duration: ${phase['duration']}',
-              style: const TextStyle(color: Colors.grey),
+              style: context.textStyles.labelSmall.darkGrey(context),
             ),
             children: [
               Padding(
@@ -783,7 +778,7 @@ Your personalized roadmap is being finalized with AI-powered insights.
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Tasks:',
+                      'Tasks :',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -829,10 +824,7 @@ Your personalized roadmap is being finalized with AI-powered insights.
                 Expanded(
                   child: Text(
                     task['task'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: context.textStyles.labelMedium,
                   ),
                 ),
                 Container(
@@ -841,7 +833,7 @@ Your personalized roadmap is being finalized with AI-powered insights.
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: priorityColor.withOpacity(0.1),
+                    color: priorityColor.withAlpha(26),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: priorityColor.withOpacity(0.3)),
                   ),
@@ -859,7 +851,7 @@ Your personalized roadmap is being finalized with AI-powered insights.
             const SizedBox(height: 4),
             Text(
               task['description'],
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: context.textStyles.labelSmall.darkGrey(context),
             ),
             const SizedBox(height: 8),
             Row(
@@ -868,14 +860,14 @@ Your personalized roadmap is being finalized with AI-powered insights.
                 const SizedBox(width: 4),
                 Text(
                   task['duration'],
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: context.textStyles.labelSmall.darkGrey(context),
                 ),
                 const SizedBox(width: 16),
                 Icon(Icons.build, size: 14, color: Colors.grey),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    ((task['resources'] as List?) ?? []).join(', '),
+                    (task['resources'] as List).join(', '),
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

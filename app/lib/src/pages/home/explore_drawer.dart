@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/providers/user_profile_provider.dart';
 import 'package:udyogmitra/src/services/google_auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ExploreDrawer extends StatelessWidget {
+class ExploreDrawer extends ConsumerWidget {
   const ExploreDrawer({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userProfile = ref.watch(userProfileProvider);
+
     return Drawer(
       child: Column(
         children: [
-          const DrawerHeader(
+          DrawerHeader(
             decoration: BoxDecoration(color: Colors.green),
             child: Align(
               alignment: Alignment.bottomLeft,
               child: Text(
-                'Username',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+                userProfile == null ? "Username" : userProfile.fullName,
+                style: TextStyle(color: Colors.white, fontSize: 26),
               ),
             ),
           ),
@@ -97,7 +102,9 @@ class _DrawerItem extends StatelessWidget {
       leading: Icon(icon, color: title == 'Logout' ? Colors.red : null),
       title: Text(
         title,
-        style: title == 'Logout' ? const TextStyle(color: Colors.red) : null,
+        style: title == 'Logout'
+            ? const TextStyle(color: Colors.red)
+            : context.textStyles.bodySmall,
       ),
       onTap: () async {
         Navigator.pop(context); // Close the drawer

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/api_models.dart';
 
@@ -523,20 +525,13 @@ Skills Available: ${widget.userSkills.join(', ')}
                     const SizedBox(height: 24),
                     Text(
                       'AI is evaluating your idea...',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
-                      ),
+                      style: context.textStyles.bodyMedium.grey(context),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Analyzing feasibility, market potential, and providing insights',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
+                      style: context.textStyles.bodySmall.darkGrey(context),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -1003,14 +998,19 @@ Skills Available: ${widget.userSkills.join(', ')}
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(fontSize: 14)),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2E7D32),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF2E7D32),
+              ),
+              softWrap: true,
             ),
           ),
         ],

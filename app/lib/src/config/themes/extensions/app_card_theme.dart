@@ -137,8 +137,8 @@ final appCardThemeDark = AppCardTheme(
 
   greenGradient: LinearGradient(
     colors: [
-      Colors.green.shade600.withAlpha(60),
-      Colors.green.shade400.withAlpha(60),
+      Colors.green.shade500.withAlpha(150),
+      Colors.green.shade400.withAlpha(150),
     ],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/api_models.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 
 class BusinessIdeasScreen extends StatefulWidget {
   final List<String> skills;
@@ -203,11 +205,9 @@ class _BusinessIdeasScreenState extends State<BusinessIdeasScreen> {
           const SizedBox(height: 8),
           Text(
             'Based on your skills: ${widget.skills.join(', ')}',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-              fontStyle: FontStyle.italic,
-            ),
+            style: context.textStyles.bodySmall
+                .grey(context)
+                .copyWith(fontStyle: FontStyle.italic),
           ),
           const SizedBox(height: 24),
 
@@ -252,20 +252,13 @@ class _BusinessIdeasScreenState extends State<BusinessIdeasScreen> {
                     const SizedBox(height: 24),
                     Text(
                       'UdyogMitra AI is analyzing your skills...',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
-                      ),
+                      style: context.textStyles.bodyMedium.grey(context),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Generating personalized business opportunities',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
+                      style: context.textStyles.bodySmall.darkGrey(context),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -379,10 +372,9 @@ class _BusinessIdeasScreenState extends State<BusinessIdeasScreen> {
                             const SizedBox(height: 8),
                             Text(
                               idea['description'],
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
+                              style: isSelected
+                                  ? context.textStyles.bodySmall.black()
+                                  : context.textStyles.bodySmall,
                             ),
                             const SizedBox(height: 12),
 

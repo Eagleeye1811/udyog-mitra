@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'package:udyogmitra/src/config/themes/helpers.dart';
 import 'screens/skill_input_screen.dart';
 import 'screens/business_ideas_screen.dart';
 import 'screens/idea_evaluation_screen.dart';
@@ -86,7 +88,7 @@ class _BusinessPlannerScreenState extends State<BusinessPlannerScreen> {
                       decoration: BoxDecoration(
                         color: i <= _currentStep
                             ? Colors.white
-                            : Colors.white.withOpacity(0.3),
+                            : Colors.white.withAlpha(77),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -106,16 +108,12 @@ class _BusinessPlannerScreenState extends State<BusinessPlannerScreen> {
               children: [
                 Text(
                   _getStepTitle(_currentStep),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: context.textStyles.labelLarge.white(),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Step ${_currentStep + 1} of 4',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  style: context.textStyles.labelSmall.white(),
                 ),
               ],
             ),

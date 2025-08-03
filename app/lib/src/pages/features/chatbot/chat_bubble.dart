@@ -1,40 +1,102 @@
 import 'package:flutter/material.dart';
+import 'package:udyogmitra/src/config/themes/app_theme.dart';
+import 'dart:async';
 
-class ChatBubble extends StatelessWidget {
+class ChatBubble extends StatefulWidget {
   final bool isUser;
   final String message;
-  const ChatBubble({super.key, required this.isUser, required this.message});
+  final bool animate;
+  final ScrollController scrollController;
+
+  const ChatBubble({
+    super.key,
+    required this.isUser,
+    required this.message,
+    this.animate = false,
+    required this.scrollController,
+  });
+
+  @override
+  State<ChatBubble> createState() => _ChatBubbleState();
+}
+
+class _ChatBubbleState extends State<ChatBubble> {
+  String _visibleText = "";
+  Timer? _timer;
+  int _wordIndex = 0;
+
+  void _startTyping() {
+    final words = widget.message.split(' ');
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (_wordIndex < words.length) {
+        setState(() {
+          _visibleText += (_wordIndex == 0 ? '' : ' ') + words[_wordIndex];
+          _wordIndex++;
+          scrollToBottom();
+        });
+      } else {
+        _timer?.cancel();
+      }
+    });
+  }
+
+  void scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.scrollController.animateTo(
+        widget.scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 100),
+        curve: Curves.fastOutSlowIn,
+      );
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.animate && !widget.isUser) {
+      _startTyping();
+    } else {
+      _visibleText = widget.message;
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: widget.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: screenWidth * 0.75),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-          margin: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(
-            color: isUser
-                ? const Color.fromARGB(255, 233, 233, 233)
-                : const Color.fromARGB(255, 75, 207, 143),
+            color: widget.isUser
+                ? context.cardStyles.primaryCard.color
+                : context.cardStyles.greenTransparentCard.color,
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(15),
-              topRight: Radius.circular(15),
-              bottomLeft: isUser ? Radius.circular(15) : Radius.circular(0),
-              bottomRight: isUser ? Radius.circular(0) : Radius.circular(15),
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+              bottomLeft: widget.isUser
+                  ? Radius.circular(20)
+                  : Radius.circular(0),
+              bottomRight: widget.isUser
+                  ? Radius.circular(0)
+                  : Radius.circular(20),
             ),
-            border: isUser
-                ? Border.all(
-                    color: const Color.fromARGB(255, 95, 95, 95),
-                    width: 1,
-                  )
-                : Border.all(color: Colors.transparent),
+            border: widget.isUser
+                ? Border.all(color: Colors.grey.shade800, width: 1)
+                : Border.all(color: Colors.black87, width: 1),
             boxShadow: [
               BoxShadow(
-                color: isUser
+                color: widget.isUser
                     ? const Color.fromARGB(255, 230, 230, 230)
                     : Colors.black,
                 spreadRadius: 0.5,
@@ -43,8 +105,8 @@ class ChatBubble extends StatelessWidget {
             ],
           ),
           child: Text(
-            message,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+            _visibleText,
+            style: context.textStyles.bodySmall,
             textAlign: TextAlign.start,
           ),
         ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:udyogmitra/src/config/themes/color_schemes.dart';
+import 'package:udyogmitra/src/config/themes/app_colors.dart';
 import 'package:udyogmitra/src/config/themes/extensions/app_card_theme.dart';
 import 'package:udyogmitra/src/config/themes/extensions/app_typography.dart';
 
@@ -8,7 +8,7 @@ class AppThemes {
     brightness: Brightness.light,
     primarySwatch: Colors.green,
     useMaterial3: true,
-    primaryColor: ColorSchemes.lightColorScheme.primary,
+    primaryColor: AppColors.green,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
       foregroundColor: Colors.black,
@@ -25,7 +25,7 @@ class AppThemes {
     brightness: Brightness.dark,
     primarySwatch: Colors.green,
     useMaterial3: true,
-    primaryColor: ColorSchemes.darkColorScheme.primary,
+    primaryColor: AppColors.green,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.black,
       foregroundColor: Colors.white,
