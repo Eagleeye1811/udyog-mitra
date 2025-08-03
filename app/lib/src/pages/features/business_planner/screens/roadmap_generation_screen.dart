@@ -11,6 +11,8 @@ class RoadmapGenerationScreen extends StatefulWidget {
   final List<String> userSkills;
   final VoidCallback onBack;
   final VoidCallback onComplete;
+  final Map<String, dynamic>? cachedRoadmapData;
+  final Function(Map<String, dynamic>)? onRoadmapDataGenerated;
 
   const RoadmapGenerationScreen({
     super.key,
@@ -19,6 +21,8 @@ class RoadmapGenerationScreen extends StatefulWidget {
     required this.userSkills,
     required this.onBack,
     required this.onComplete,
+    this.cachedRoadmapData,
+    this.onRoadmapDataGenerated,
   });
 
   @override
@@ -35,7 +39,13 @@ class _RoadmapGenerationScreenState extends State<RoadmapGenerationScreen> {
   @override
   void initState() {
     super.initState();
-    _generateRoadmap();
+    // Check if we have cached roadmap data first
+    if (widget.cachedRoadmapData != null) {
+      _roadmapData = widget.cachedRoadmapData!;
+      _isLoading = false;
+    } else {
+      _generateRoadmap();
+    }
   }
 
   @override
@@ -79,12 +89,18 @@ Investment Range: ${widget.evaluationResult['financial_projections']?['initial_i
       );
 
       if (_cancelToken?.isCancelled == false) {
+        final roadmapData = _convertApiRoadmapToUIFormat(
+          roadmapResponse['response'],
+        );
         setState(() {
-          _roadmapData = _convertApiRoadmapToUIFormat(
-            roadmapResponse['response'],
-          );
+          _roadmapData = roadmapData;
           _isLoading = false;
         });
+
+        // Cache the generated roadmap data
+        if (widget.onRoadmapDataGenerated != null) {
+          widget.onRoadmapDataGenerated!(roadmapData);
+        }
       }
     } catch (e) {
       if (_cancelToken?.isCancelled == false) {
@@ -157,17 +173,21 @@ Your personalized roadmap is being finalized with AI-powered insights.
     // Extract structured phases from the roadmap text
     List<Map<String, dynamic>> phases = _extractPhasesFromText(roadmapText);
     List<String> milestoneStrings = _extractMilestonesFromText(roadmapText);
-    
+
     // Convert milestone strings to structured format
-    List<Map<String, dynamic>> milestones = milestoneStrings.asMap().entries.map((entry) {
-      return {
-        'id': entry.key + 1,
-        'title': entry.value,
-        'status': entry.key == 0 ? 'current' : 'upcoming',
-        'target_date': 'Month ${(entry.key + 1) * 2}',
-        'description': 'Important milestone in your business journey',
-      };
-    }).toList();
+    List<Map<String, dynamic>> milestones = milestoneStrings
+        .asMap()
+        .entries
+        .map((entry) {
+          return {
+            'id': entry.key + 1,
+            'title': entry.value,
+            'status': entry.key == 0 ? 'current' : 'upcoming',
+            'target_date': 'Month ${(entry.key + 1) * 2}',
+            'description': 'Important milestone in your business journey',
+          };
+        })
+        .toList();
 
     return {
       'business_name': widget.selectedIdea['title'] ?? 'Your Business',
@@ -479,7 +499,7 @@ Your personalized roadmap is being finalized with AI-powered insights.
           'Legal advisor consultation',
           'Compliance checklist',
           'Intellectual property guidance',
-        ]
+        ],
       },
       {
         'category': 'Financial Resources',
@@ -488,7 +508,7 @@ Your personalized roadmap is being finalized with AI-powered insights.
           'Business banking setup',
           'Accounting software',
           'Tax planning guidance',
-        ]
+        ],
       },
       {
         'category': 'Marketing & Sales',
@@ -497,7 +517,7 @@ Your personalized roadmap is being finalized with AI-powered insights.
           'Brand identity development',
           'Website and social media setup',
           'Customer acquisition strategies',
-        ]
+        ],
       },
       {
         'category': 'Operations',
@@ -506,7 +526,7 @@ Your personalized roadmap is being finalized with AI-powered insights.
           'Essential equipment and tools',
           'Technology infrastructure',
           'Supply chain setup',
-        ]
+        ],
       },
     ];
   }
@@ -995,61 +1015,63 @@ Your personalized roadmap is being finalized with AI-powered insights.
               ),
             ),
             const SizedBox(height: 16),
-            ...metrics.map(
-              (metric) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+            ...metrics
+                .map(
+                  (metric) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.analytics,
-                          color: Color(0xFF2E7D32),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            metric['metric'],
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.analytics,
                               color: Color(0xFF2E7D32),
+                              size: 20,
                             ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                metric['metric'],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF2E7D32),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 32),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Target: ${metric['target']}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                metric['description'],
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Target: ${metric['target']}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.orange,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            metric['description'],
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ).toList(),
+                  ),
+                )
+                .toList(),
           ],
         ),
       ),
