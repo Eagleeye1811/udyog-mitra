@@ -9,12 +9,16 @@ class BusinessIdeasScreen extends StatefulWidget {
   final List<String> skills;
   final Function(Map<String, dynamic>) onIdeaSelected;
   final VoidCallback onBack;
+  final List<Map<String, dynamic>>? cachedIdeas;
+  final Function(List<Map<String, dynamic>>)? onIdeasGenerated;
 
   const BusinessIdeasScreen({
     super.key,
     required this.skills,
     required this.onIdeaSelected,
     required this.onBack,
+    this.cachedIdeas,
+    this.onIdeasGenerated,
   });
 
   @override
@@ -31,7 +35,13 @@ class _BusinessIdeasScreenState extends State<BusinessIdeasScreen> {
   @override
   void initState() {
     super.initState();
-    _generateBusinessIdeas();
+    // Check if we have cached ideas first
+    if (widget.cachedIdeas != null && widget.cachedIdeas!.isNotEmpty) {
+      _businessIdeas = widget.cachedIdeas!;
+      _isLoading = false;
+    } else {
+      _generateBusinessIdeas();
+    }
   }
 
   @override
@@ -61,10 +71,16 @@ class _BusinessIdeasScreenState extends State<BusinessIdeasScreen> {
       );
 
       if (_cancelToken?.isCancelled == false) {
+        final businessIdeas = _convertApiResponseToIdeas(response);
         setState(() {
-          _businessIdeas = _convertApiResponseToIdeas(response);
+          _businessIdeas = businessIdeas;
           _isLoading = false;
         });
+
+        // Cache the generated ideas
+        if (widget.onIdeasGenerated != null) {
+          widget.onIdeasGenerated!(businessIdeas);
+        }
       }
     } catch (e) {
       if (_cancelToken?.isCancelled == false) {

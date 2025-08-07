@@ -10,6 +10,8 @@ class IdeaEvaluationScreen extends StatefulWidget {
   final List<String> userSkills;
   final Function(Map<String, dynamic>) onEvaluationComplete;
   final VoidCallback onBack;
+  final Map<String, dynamic>? cachedEvaluationData;
+  final Function(Map<String, dynamic>)? onEvaluationDataGenerated;
 
   const IdeaEvaluationScreen({
     super.key,
@@ -17,6 +19,8 @@ class IdeaEvaluationScreen extends StatefulWidget {
     required this.userSkills,
     required this.onEvaluationComplete,
     required this.onBack,
+    this.cachedEvaluationData,
+    this.onEvaluationDataGenerated,
   });
 
   @override
@@ -32,7 +36,13 @@ class _IdeaEvaluationScreenState extends State<IdeaEvaluationScreen> {
   @override
   void initState() {
     super.initState();
-    _generateEvaluation();
+    // Check if we have cached evaluation data first
+    if (widget.cachedEvaluationData != null) {
+      _evaluationResult = widget.cachedEvaluationData!;
+      _isLoading = false;
+    } else {
+      _generateEvaluation();
+    }
   }
 
   @override
@@ -44,12 +54,18 @@ class _IdeaEvaluationScreenState extends State<IdeaEvaluationScreen> {
   void _generateEvaluation() async {
     // Check if we already have API evaluation data (from standalone flow)
     if (widget.selectedIdea.containsKey('api_evaluation')) {
+      final evaluationResult = _convertApiEvaluationToUIFormat(
+        widget.selectedIdea['api_evaluation'],
+      );
       setState(() {
-        _evaluationResult = _convertApiEvaluationToUIFormat(
-          widget.selectedIdea['api_evaluation'],
-        );
+        _evaluationResult = evaluationResult;
         _isLoading = false;
       });
+
+      // Cache the result
+      if (widget.onEvaluationDataGenerated != null) {
+        widget.onEvaluationDataGenerated!(evaluationResult);
+      }
     } else {
       // For business planner flow, make actual API call
       try {
@@ -80,12 +96,18 @@ Skills Available: ${widget.userSkills.join(', ')}
         );
 
         if (_cancelToken?.isCancelled == false) {
+          final evaluationResult = _convertApiEvaluationToUIFormat(
+            evaluationResponse['response'],
+          );
           setState(() {
-            _evaluationResult = _convertApiEvaluationToUIFormat(
-              evaluationResponse['response'],
-            );
+            _evaluationResult = evaluationResult;
             _isLoading = false;
           });
+
+          // Cache the generated evaluation data
+          if (widget.onEvaluationDataGenerated != null) {
+            widget.onEvaluationDataGenerated!(evaluationResult);
+          }
         }
       } catch (e) {
         if (_cancelToken?.isCancelled == false) {
