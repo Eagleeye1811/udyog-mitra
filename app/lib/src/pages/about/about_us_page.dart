@@ -15,92 +15,95 @@ class AboutUsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('About Us', style: context.textStyles.appBarTitle),
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 10),
-            child: IconButton(
-              icon: Icon(
-                ref.watch(themeModeProvider) == ThemeMode.dark
-                    ? Icons.dark_mode
-                    : Icons.light_mode,
-                color: context.textStyles.bodyMedium.color,
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('About Us', style: context.textStyles.appBarTitle),
+          elevation: 0,
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+          actions: [
+            Padding(
+              padding: EdgeInsets.only(right: 10),
+              child: IconButton(
+                icon: Icon(
+                  ref.watch(themeModeProvider) == ThemeMode.dark
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                  color: context.textStyles.bodyMedium.color,
+                ),
+                onPressed: () {
+                  ref.read(themeModeProvider.notifier).toggleTheme();
+                },
               ),
-              onPressed: () {
-                ref.read(themeModeProvider.notifier).toggleTheme();
-              },
             ),
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          // Main scrollable content
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(
-              bottom: 100, // Space for floating bottom nav
+          ],
+        ),
+        body: Stack(
+          children: [
+            // Main scrollable content
+            SingleChildScrollView(
+              padding: const EdgeInsets.only(
+                bottom: 100, // Space for floating bottom nav
+              ),
+              child: Column(
+                children: [
+                  // Hero Section - Company intro
+                  _buildHeroSection(context),
+
+                  const SizedBox(height: 16),
+
+                  // Mission & Vision Section
+                  _buildMissionVisionSection(context),
+
+                  const SizedBox(height: 16),
+
+                  // Our Story Section
+                  _buildOurStorySection(context),
+
+                  const SizedBox(height: 16),
+
+                  // Core Values Section
+                  _buildCoreValuesSection(context),
+
+                  const SizedBox(height: 16),
+
+                  // Key Features Section
+                  _buildKeyFeaturesSection(context),
+
+                  const SizedBox(height: 16),
+
+                  // Team Section
+                  _buildTeamSection(context),
+
+                  const SizedBox(height: 16),
+
+                  // User Testimonials Section
+                  _buildTestimonialsSection(context),
+
+                  const SizedBox(height: 16),
+
+                  // Our Impact Section
+                  _buildImpactSection(context),
+
+                  const SizedBox(height: 16),
+
+                  // Data Privacy Section
+                  _buildDataPrivacySection(context),
+
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
-            child: Column(
-              children: [
-                // Hero Section - Company intro
-                _buildHeroSection(context),
 
-                const SizedBox(height: 16),
-
-                // Mission & Vision Section
-                _buildMissionVisionSection(context),
-
-                const SizedBox(height: 16),
-
-                // Our Story Section
-                _buildOurStorySection(context),
-
-                const SizedBox(height: 16),
-
-                // Core Values Section
-                _buildCoreValuesSection(context),
-
-                const SizedBox(height: 16),
-
-                // Key Features Section
-                _buildKeyFeaturesSection(context),
-
-                const SizedBox(height: 16),
-
-                // Team Section
-                _buildTeamSection(context),
-
-                const SizedBox(height: 16),
-
-                // User Testimonials Section
-                _buildTestimonialsSection(context),
-
-                const SizedBox(height: 16),
-
-                // Our Impact Section
-                _buildImpactSection(context),
-
-                const SizedBox(height: 16),
-
-                // Data Privacy Section
-                _buildDataPrivacySection(context),
-
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-
-          // Floating Custom Bottom Nav - Same as other pages
-          navbar(context, 1),
-        ],
+            // Floating Custom Bottom Nav - Same as other pages
+            navbar(context, 1),
+          ],
+        ),
       ),
     );
   }
@@ -786,7 +789,7 @@ class AboutUsPage extends ConsumerWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 1.1,
+                childAspectRatio: 1.3,
                 children: [
                   _buildImpactCard(
                     context: context,
@@ -845,9 +848,9 @@ class AboutUsPage extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withAlpha(13),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
+        border: Border.all(color: color.withAlpha(52), width: 1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -857,10 +860,10 @@ class AboutUsPage extends ConsumerWidget {
           //   ? Image.asset(imagePath, height: 40, width: 40)
           //   :
           Container(
-            height: 40,
+            height: 50,
             width: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withAlpha(26),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -942,10 +945,10 @@ class AboutUsPage extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.05),
+                  color: Colors.green.withAlpha(13),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.green.withOpacity(0.2),
+                    color: Colors.green.withAlpha(52),
                     width: 1,
                   ),
                 ),
@@ -981,7 +984,7 @@ class AboutUsPage extends ConsumerWidget {
           height: 32,
           width: 32,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withAlpha(26),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color, size: 18),

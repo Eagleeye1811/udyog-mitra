@@ -8,6 +8,7 @@ class ChatBubble extends StatefulWidget {
   final bool animate;
   final ScrollController scrollController;
   final Function(bool) setLoading;
+  final VoidCallback onAnimationComplete;
 
   const ChatBubble({
     super.key,
@@ -16,6 +17,7 @@ class ChatBubble extends StatefulWidget {
     this.animate = false,
     required this.scrollController,
     required this.setLoading,
+    required this.onAnimationComplete,
   });
 
   @override
@@ -26,8 +28,6 @@ class _ChatBubbleState extends State<ChatBubble> {
   String _visibleText = "";
   Timer? _timer;
   int _wordIndex = 0;
-
-  bool hasAnimated = false;
 
   void _startTyping() {
     final words = widget.message.split(' ');
@@ -46,6 +46,7 @@ class _ChatBubbleState extends State<ChatBubble> {
           widget.setLoading(false);
         }
         _timer?.cancel();
+        widget.onAnimationComplete();
       }
     });
   }
@@ -64,7 +65,6 @@ class _ChatBubbleState extends State<ChatBubble> {
   void initState() {
     super.initState();
     if (widget.animate && !widget.isUser) {
-      hasAnimated = true;
       _startTyping();
     } else {
       _visibleText = widget.message;

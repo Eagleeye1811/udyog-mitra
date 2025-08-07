@@ -58,103 +58,106 @@ class _IdeaEvaluatorScreenState extends State<IdeaEvaluatorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Idea Evaluator'),
-        backgroundColor: const Color(0xFF2E7D32),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          // Progress Indicator
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: const Color(0xFF2E7D32),
-            child: Row(
-              children: [
-                for (int i = 0; i < 3; i++) ...[
-                  Expanded(
-                    child: Container(
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: i <= _currentStep
-                            ? Colors.white
-                            : Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(2),
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Idea Evaluator'),
+          backgroundColor: const Color(0xFF2E7D32),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        body: Column(
+          children: [
+            // Progress Indicator
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: const Color(0xFF2E7D32),
+              child: Row(
+                children: [
+                  for (int i = 0; i < 3; i++) ...[
+                    Expanded(
+                      child: Container(
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: i <= _currentStep
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
-                  ),
-                  if (i < 2) const SizedBox(width: 8),
+                    if (i < 2) const SizedBox(width: 8),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
 
-          // Step Indicator
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            color: const Color(0xFF388E3C),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _getStepTitle(_currentStep),
-                  style: context.textStyles.bodyMedium,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Step ${_currentStep + 1} of 3',
-                  style: context.textStyles.labelSmall.grey(context),
-                ),
-              ],
+            // Step Indicator
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              color: const Color(0xFF388E3C),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _getStepTitle(_currentStep),
+                    style: context.textStyles.labelLarge.white(),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Step ${_currentStep + 1} of 3',
+                    style: context.textStyles.labelSmall.white(),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // Main Content
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                // Step 1: Idea Input
-                IdeaInputScreen(
-                  onIdeaSubmitted: (idea) {
-                    _updateIdeaData(idea);
-                    _moveToNextStep();
-                  },
-                  onBack: () => Navigator.pop(context),
-                ),
+            // Main Content
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  // Step 1: Idea Input
+                  IdeaInputScreen(
+                    onIdeaSubmitted: (idea) {
+                      _updateIdeaData(idea);
+                      _moveToNextStep();
+                    },
+                    onBack: () => Navigator.pop(context),
+                  ),
 
-                // Step 2: Idea Evaluation
-                _ideaData != null
-                    ? IdeaEvaluationScreen(
-                        selectedIdea: _ideaData!,
-                        userSkills:
-                            const [], // No skills for standalone evaluation
-                        onEvaluationComplete: (evaluation) {
-                          _updateEvaluation(evaluation);
-                          _moveToNextStep();
-                        },
-                        onBack: _moveToPreviousStep,
-                      )
-                    : const Center(child: CircularProgressIndicator()),
+                  // Step 2: Idea Evaluation
+                  _ideaData != null
+                      ? IdeaEvaluationScreen(
+                          selectedIdea: _ideaData!,
+                          userSkills:
+                              const [], // No skills for standalone evaluation
+                          onEvaluationComplete: (evaluation) {
+                            _updateEvaluation(evaluation);
+                            _moveToNextStep();
+                          },
+                          onBack: _moveToPreviousStep,
+                        )
+                      : const Center(child: CircularProgressIndicator()),
 
-                // Step 3: Roadmap Generation
-                _evaluationResult != null && _ideaData != null
-                    ? RoadmapGenerationScreen(
-                        evaluationResult: _evaluationResult!,
-                        selectedIdea: _ideaData!,
-                        userSkills:
-                            const [], // No skills for standalone evaluation
-                        onBack: _moveToPreviousStep,
-                        onComplete: () => Navigator.pop(context),
-                      )
-                    : const Center(child: CircularProgressIndicator()),
-              ],
+                  // Step 3: Roadmap Generation
+                  _evaluationResult != null && _ideaData != null
+                      ? RoadmapGenerationScreen(
+                          evaluationResult: _evaluationResult!,
+                          selectedIdea: _ideaData!,
+                          userSkills:
+                              const [], // No skills for standalone evaluation
+                          onBack: _moveToPreviousStep,
+                          onComplete: () => Navigator.pop(context),
+                        )
+                      : const Center(child: CircularProgressIndicator()),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -301,9 +304,9 @@ ${_revenueModelController.text.isNotEmpty ? 'Revenue Model: ${_revenueModelContr
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Provide details about your idea to get a comprehensive evaluation.',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: context.textStyles.bodySmall.darkGrey(context),
           ),
           const SizedBox(height: 24),
 

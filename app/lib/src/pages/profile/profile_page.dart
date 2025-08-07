@@ -38,91 +38,94 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     // Think of it like subscribing to a YouTube channel - you get notified when new content comes!
     final userProfile = ref.watch(userProfileProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile', style: context.textStyles.appBarTitle),
-        elevation: 0,
-        centerTitle: true,
-        automaticallyImplyLeading: false, // Remove the back arrow
-        actions: [
-          IconButton(
-            icon: Icon(
-              ref.watch(themeModeProvider) == ThemeMode.dark
-                  ? Icons.dark_mode
-                  : Icons.light_mode,
-              color: Colors.green,
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Profile', style: context.textStyles.appBarTitle),
+          elevation: 0,
+          centerTitle: true,
+          automaticallyImplyLeading: false, // Remove the back arrow
+          actions: [
+            IconButton(
+              icon: Icon(
+                ref.watch(themeModeProvider) == ThemeMode.dark
+                    ? Icons.dark_mode
+                    : Icons.light_mode,
+                color: Colors.green,
+              ),
+              onPressed: () {
+                ref.read(themeModeProvider.notifier).toggleTheme();
+              },
             ),
-            onPressed: () {
-              ref.read(themeModeProvider.notifier).toggleTheme();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Navigate to settings page
-            },
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          // Main scrollable content
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(
-              bottom: 100,
-            ), // to avoid overlap with bottom nav
-            child: userProfile == null
-                ? // Show loading spinner while we wait for user data to load
-                  const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                // Navigate to settings page
+              },
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            // Main scrollable content
+            SingleChildScrollView(
+              padding: const EdgeInsets.only(
+                bottom: 100,
+              ), // to avoid overlap with bottom nav
+              child: userProfile == null
+                  ? // Show loading spinner while we wait for user data to load
+                    const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                      ),
+                    )
+                  : // Once we have user data, show the profile content
+                    Column(
+                      children: [
+                        // All these widgets below automatically get the user data
+                        // because they also use the same provider (userProfileProvider)
+
+                        // Profile Header Section - Shows profile picture, name, location
+                        const ProfileHeaderWidget(),
+
+                        const SizedBox(height: 16),
+
+                        // Personal Information Card - Shows email, phone, gender etc.
+                        const PersonalInfoCard(),
+
+                        const SizedBox(height: 16),
+
+                        // Skills Section - Shows and manages user skills
+                        const SkillsSection(),
+
+                        const SizedBox(height: 16),
+
+                        // Business Section - Shows user's registered businesses
+                        const BusinessSection(),
+
+                        const SizedBox(height: 16),
+
+                        // Applications Section - Shows user's job/scheme applications
+                        const ApplicationsSection(),
+
+                        const SizedBox(height: 16),
+
+                        // Additional Information Section - Shows education, occupation etc.
+                        const AdditionalInfoSection(),
+
+                        const SizedBox(height: 20),
+
+                        // Action Buttons for logout and password change
+                        _buildActionButtons(context),
+                      ],
                     ),
-                  )
-                : // Once we have user data, show the profile content
-                  Column(
-                    children: [
-                      // All these widgets below automatically get the user data
-                      // because they also use the same provider (userProfileProvider)
+            ),
 
-                      // Profile Header Section - Shows profile picture, name, location
-                      const ProfileHeaderWidget(),
-
-                      const SizedBox(height: 16),
-
-                      // Personal Information Card - Shows email, phone, gender etc.
-                      const PersonalInfoCard(),
-
-                      const SizedBox(height: 16),
-
-                      // Skills Section - Shows and manages user skills
-                      const SkillsSection(),
-
-                      const SizedBox(height: 16),
-
-                      // Business Section - Shows user's registered businesses
-                      const BusinessSection(),
-
-                      const SizedBox(height: 16),
-
-                      // Applications Section - Shows user's job/scheme applications
-                      const ApplicationsSection(),
-
-                      const SizedBox(height: 16),
-
-                      // Additional Information Section - Shows education, occupation etc.
-                      const AdditionalInfoSection(),
-
-                      const SizedBox(height: 20),
-
-                      // Action Buttons for logout and password change
-                      _buildActionButtons(context),
-                    ],
-                  ),
-          ),
-
-          // Floating Custom Bottom Nav - Exactly same as home screen
-          navbar(context, 2),
-        ],
+            // Floating Custom Bottom Nav - Exactly same as home screen
+            navbar(context, 2),
+          ],
+        ),
       ),
     );
   }
